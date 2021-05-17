@@ -61,7 +61,7 @@ void testGetResetValue() {
     uint8 resetData[2];
     resetCnt[1].resetdata = resetData;
     resetCnt[1].resetdata[0] = 0x04;
-    resetCnt[1].resetdata[1] = 0xff;
+    resetCnt[1].resetdata[1] = 254;
 
     MasterFVM_getResetValue(1, &pduInfoPtr);
     // mac的构造采用直接复制的方式

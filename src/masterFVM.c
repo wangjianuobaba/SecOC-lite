@@ -191,6 +191,14 @@ MasterFVM_getResetValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
     */
     if (TxPduId < NUM_RESET) {
         current_reset = resetCnt[TxPduId];
+        // 配置resetData最多2个字节
+        uint16 resetData = ((uint16)current_reset.resetdata[0] << 8) + (uint16)current_reset.resetdata[1];
+        // resetData + 1
+        if(resetData < (1<<current_reset.ResetCntLength)-1)
+            resetData++;
+        for(int i=0;i<2;++i){
+            current_reset.resetdata[i] = (uint8)(resetData>>(8*(1-i)));
+        }
         get_value(current_reset.resetcanid, PduInfoPtr, TripCntLength, current_reset.ResetCntLength);
     }
 }
