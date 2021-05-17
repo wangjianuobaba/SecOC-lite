@@ -7,25 +7,20 @@
 
 #include "Compiler.h"
 
+extern uint8 trip[3];
+extern uint8 TripCntLength;
+
 // void MasterFVM_Init(void);
 FUNC(void, MASTER_CODE)
 MasterFVM_Init();
 
 // void MasterFVM_getTripValue(const PduInfoType* PduInfoPtr ); //   获取trip及hash结果
 FUNC(void, MASTER_CODE)
-MasterFVM_getTripValue(P2CONST(PduInfoType, AUTOMATIC, SECOC_APPL_DATA) PduInfoPtr);
+MasterFVM_getTripValue(P2VAR(PduInfoType, AUTOMATIC, SECOC_APPL_DATA) PduInfoPtr);
 
 // void MasterFVM_getResetValue(PduIdType TxPduId, const PduInfoType* PduInfoPtr); //   获取reset及hash结果
 FUNC(void, MASTER_CODE)
-MasterFVM_getResetValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId, P2CONST(PduInfoType, AUTOMATIC, SECOC_APPL_DATA) PduInfoPtr);
-
-// void MasterFVM_changestate(PduIdType TxPduId);
-FUNC(void, MASTER_CODE)
-MasterFVM_changestate(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId);
-
-// void MasterFVM_MainTx(void);
-FUNC(void, MASTER_CODE)
-        MasterFVM_MainTx();
+MasterFVM_getResetValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId, P2VAR(PduInfoType, AUTOMATIC, SECOC_APPL_DATA) PduInfoPtr);
 
 
 #endif //SECOC_MASTERFVM_H
