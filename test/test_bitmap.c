@@ -1,4 +1,4 @@
-#include"../utils/bitmap.h"
+#include"bitmap.h"
 
 // 1-10
 // 0-9
