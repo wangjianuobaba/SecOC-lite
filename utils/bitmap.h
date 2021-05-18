@@ -4,6 +4,7 @@
 #include<string.h>
 #include<malloc.h>
 #include<stdbool.h>
+#include"platform_Types.h"
 
 #define min(a, b) (a < b ? a:b)
 

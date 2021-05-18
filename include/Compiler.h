@@ -42,5 +42,11 @@ ResetCnt_Type resetCnt[2];
 
 // -------------------------------
 
+// compiler_Cfg.h
+#define SLAVE_CODE
+#define STD_TYPES_VAR
+#define FRESH_VAR
+#define SLAVE_APPL_DATA
+#define SLAVE_APPL_CONST
 
 #endif //SECOC_MASTERFVM_CFG_H
