@@ -12,8 +12,15 @@
 #define SYN_ERROR_SIZE 3
 
 //slaveFVM_Types.h
+typedef struct
+{
+    uint8 *resetdata;
+    uint8 *preresetdata;
+    uint8 ResetCntLengthgth;
+    uint16 resetcanid;
+} ResetCntS_Type;
 
-//slaveFVM.h
+//slaveFVM_Cfg.h
 
 //Std_Types.h
 typedef enum

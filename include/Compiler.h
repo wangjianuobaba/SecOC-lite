@@ -38,6 +38,13 @@ typedef struct {
     uint32 resetSynTime;
 } ResetCnt_Type;
 
+typedef struct {
+    uint8 resetflag;
+    uint8 resetloss;
+    uint32 resetTag;
+    uint32 resetTime;
+} ResetState_Type;
+
 ResetCnt_Type resetCnt[2];
 
 // -------------------------------
