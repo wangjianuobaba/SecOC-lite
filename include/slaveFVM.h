@@ -2,6 +2,7 @@
 #define _SLAVEFVM_H
 #include "Compiler.h"
 #include "platform_Types.h"
+#include "bitmap.h"
 
 //slaveFVM_Cfg.h
 #define NUM_RESET 2
@@ -27,14 +28,6 @@ typedef enum
 typedef uint8 PduIdType;
 
 // **********************
-
-// void FVM_changestate(PduIdType RxPduId);
-FUNC(void, SLAVE_CODE)
-FVM_changestate(VAR(PduInfoType, COMSTACK_TYPES_VAR) RxPduId);
-
-// void FVM_Syn_check(void);
-FUNC(void, SLAVE_CODE)
-FVM_Syn_check(void);
 
 // Std_ReturnType FVM_updateTrip(const PduInfoType* PduInfoPtr );  //更新trip值
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
