@@ -54,3 +54,4 @@ dkms.conf
 build/
 .vscode/
 .idea/
+CMakeLists.txt
