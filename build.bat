@@ -1,3 +1,5 @@
+rem use visual studio to open project
+
 rmdir /s /q build
 mkdir build
 cd build

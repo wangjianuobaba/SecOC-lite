@@ -6,6 +6,7 @@
 #define SECOC_MASTERFVM_H
 
 #include "Compiler.h"
+#include "tools.h"
 
 extern uint8 trip[3];
 extern uint8 TripCntLength;

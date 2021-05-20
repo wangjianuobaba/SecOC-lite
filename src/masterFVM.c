@@ -9,31 +9,6 @@ uint8 trip[3];              //初始化时从非易失性存储器中获得并+1
 //例如  TripCntLength=11  且trip=0x04 0xff       [0000 0100][1111 1111][]
 // 返回一个uint8的实际位数
 
-// k=0..8,设置num的第k位为1
-uint8 set_k(uint8 num, uint8 k) {
-    num &= 1 << k;
-    return num;
-}
-
-//第k位是否为1
-uint8 is_k(uint64 num, uint8 k) {
-    if (num & (1 << k)) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-// 返回一个uint8的实际位数
-uint8 length(uint8 num) {
-    int temp = 0;
-    while (num) {
-        temp += 1;
-        num >>= 1;
-    }
-    return temp;
-}
-
 FUNC(void, MASTER_CODE)
 MasterFVM_Init(void) {
     /*
