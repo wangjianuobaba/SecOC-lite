@@ -45,7 +45,7 @@ typedef struct {
     uint32 resetTime;
 } ResetState_Type;
 
-ResetCnt_Type resetCnt[2];
+// ResetCnt_Type resetCnt[2];
 
 // -------------------------------
 

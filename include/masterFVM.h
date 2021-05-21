@@ -11,6 +11,16 @@
 extern uint8 trip[3];
 extern uint8 TripCntLength;
 
+// masterFVM_Types.h
+typedef struct
+{
+    uint8 *resetdata;
+    uint8 ResetCntLength;
+    uint16 resetcanid;
+    uint32 resetSyntag;
+    uint32 resetSynTime;
+} ResetCnt_Type;
+
 // void MasterFVM_Init(void);
 FUNC(void, MASTER_CODE)
 MasterFVM_Init();
