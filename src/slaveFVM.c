@@ -4,7 +4,7 @@ uint8 verifystate = 0; // verifystate确认状态 0表示未确认 1表示确认
 
 uint16 tripcanid = 0x2bd;    //可配置
 extern uint8 trip[3];               // trip报文
-uint8 TripCntLengthgth = 16; //可配置
+uint8 TripCntLength = 16; //可配置
 uint16 ackid = 0x2be;        //返回的ack报文  可配置
 
 /**
@@ -23,19 +23,19 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST) PduInfoPtr) {
     // trip报文的trip部分 长度为TripCntLengthgth
     memset(trip, 0, sizeof(uint8) * 3);
     bitmap trip_bits = init_from_uint8(trip, sizeof(trip) * 8);
-    for (int i = 0; i < TripCntLengthgth; i++) {
+    for (int i = 0; i < TripCntLength; i++) {
         if (test(trip_message, i))
             set(trip_bits, i);
     }
     // trip报文的reset部分 长度为1bit
     bool reset_flag = false;
-    if (test(trip_message, TripCntLengthgth))
+    if (test(trip_message, TripCntLength))
         reset_flag = true;
     // trip报文的mac部分 长度为(64-TripLengthgth-1)bit
-    uint8 macLength = 64 - TripCntLengthgth - 1;
+    uint8 macLength = 64 - TripCntLength - 1;
     bitmap mac_bits = init(macLength);
     uint8 *mac = (uint8 *)mac_bits.M;
-    for (int i = TripCntLengthgth + 1; i < 64; i++) {
+    for (int i = TripCntLength + 1; i < 64; i++) {
         if (test(trip_message, i))
             set(mac_bits, i);
     }
@@ -52,22 +52,22 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST) PduInfoPtr) {
     if (reset_flag)
         set(dataptr_bits, 16);
     // trip
-    for (int i = 0; i < TripCntLengthgth; i++)
+    for (int i = 0; i < TripCntLength; i++)
         if (test(trip_bits, i))
             set(dataptr_bits, i + 17);
 
     // Csm验证
-    bitmap verifyPtr_bits = init(TripCntLengthgth + 1);
+    bitmap verifyPtr_bits = init(TripCntLength + 1);
     uint8 *verifyPtr = (uint8 *)verifyPtr_bits.M;
     // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
     //     return E_NOT_OK;
     memset(trip, 0, sizeof(trip));
-    for (int i = 0; i < TripCntLengthgth; i++) {
+    for (int i = 0; i < TripCntLength; i++) {
         if (test(verifyPtr_bits, i))
             set(trip_bits, i);
     }
     reset_flag = false;
-    if (test(verifyPtr_bits, TripCntLengthgth)) {
+    if (test(verifyPtr_bits, TripCntLength)) {
         reset_flag = true;
     }
     //(*PduInfoPtr).SduDataPtr = NULL;
@@ -85,14 +85,18 @@ uint8 preresetData[3 * NUM_MSG];
 uint16 resetcanid[] = {0x65, 0x66};
 
 ResetState_Type resetState[] = {
-    {.resetflag = 0,
-     .resetloss = 0,
-     .resetTag = 0,
-     .resetTime = 1000},
-    {.resetflag = 0,
-     .resetloss = 0,
-     .resetTag = 0,
-     .resetTime = 2500}};
+    {
+        .resetflag = 0,
+        .resetloss = 0,
+        .resetTag = 0,
+        .resetTime = 1000
+    }, {
+        .resetflag = 0,
+        .resetloss = 0,
+        .resetTag = 0,
+        .resetTime = 2500
+    }
+};
 
 /**
  * 更新reset报文 
@@ -134,33 +138,258 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId, P2CONST(PduInfoType,
     }
     // trip
     bitmap trip_bits = init_from_uint8(trip, sizeof(uint8) * 3);
-    for (int i = 0; i < TripCntLengthgth; i++)
+    for (int i = 0; i < TripCntLength; i++)
         if (test(trip_bits, i))
             set(dataptr_bits, i + 16);
     // reset
     for (int i = 0; i < ResetCntLengthgth; i++) {
         if (test(reset_bits, i))
-            set(dataptr_bits, i + 16 + TripCntLengthgth);
+            set(dataptr_bits, i + 16 + TripCntLength);
     }
 
     // Csm验证
-    bitmap verifyPtr_bits = init(TripCntLengthgth + 1);
+    bitmap verifyPtr_bits = init(TripCntLength + 1);
     uint8 *verifyPtr = (uint8 *)verifyPtr_bits.M;
     // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
     //     return E_NOT_OK;
     memset(trip, 0, sizeof(trip));
-    for (int i = 0; i < TripCntLengthgth; i++) {
+    for (int i = 0; i < TripCntLength; i++) {
         if (test(verifyPtr_bits, i))
             set(trip_bits, i);
     }
     resetState[TxPduId].resetflag = false;
-    if (test(verifyPtr_bits, TripCntLengthgth)) {
+    if (test(verifyPtr_bits, TripCntLength)) {
         resetState[TxPduId].resetflag = true;
     }
     //(*PduInfoPtr).SduDataPtr = NULL;
     //(*PduInfoPtr).SduLength = 8;
 
     // CanIf_Transmit(ackid, PduInfoPtr);
+
+    return E_OK;
+}
+
+uint8 preTrip[3 * NUM_MSG];
+uint8 msgData[6 * NUM_MSG];
+uint8 preMsgData[6 * NUM_MSG];
+
+ResetCntS_Type resetCnt[] = {
+    {
+        .resetdata = resetData,
+        .preresetdata = preresetData,
+        .ResetCntLength = 15,
+
+    }, {
+        .resetdata = resetData,
+        .preresetdata = preresetData,
+        .ResetCntLength = 17,
+        .resetcanid = 0x66
+    }
+};
+
+MsgCntS_Type msgCnt[] = {
+    {
+        .msgdata = msgData,
+        .premsgdata = preMsgData,
+        .MsgCntLength = 24},
+    {
+        .msgdata = msgData,
+        .premsgdata = preMsgData,
+        .MsgCntLength = 26
+    }
+};
+
+/**
+ * 更新pretrip prereset premsg
+*/
+FUNC(void, SLAVE_CODE)
+FVM_updatePreValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
+                   P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue)
+{
+    uint8 SecOCFreshnessValueLength = TripCntLength + resetCnt[TxPduId].ResetCntLength + msgCnt[TxPduId].MsgCntLength;
+    bitmap freshness_bits = init_from_uint8((char *)SecOCFreshnessValue, SecOCFreshnessValueLength);
+    // 根据新鲜值获取trip reset msg
+    bitmap trip_bits = init(TripCntLength);
+    for (int i = 0; i < TripCntLength; i++) {
+        if (test(freshness_bits, i + 64 - TripCntLength))
+            set(trip_bits, i);
+    }
+    bitmap reset_bits = init(resetCnt[TxPduId].ResetCntLength);
+    for (int i = 0; i < resetCnt[TxPduId].ResetCntLength; i++) {
+        if (test(freshness_bits, i + 64 - TripCntLength - resetCnt[TxPduId].ResetCntLength))
+            set(reset_bits, i);
+    }
+    bitmap msg_bits = init(msgCnt[TxPduId].MsgCntLength);
+    for (int i = 0; i < msgCnt[TxPduId].MsgCntLength; i++) {
+        if (test(freshness_bits, i + 64 - TripCntLength - resetCnt[TxPduId].ResetCntLength - msgCnt[TxPduId].MsgCntLength))
+            set(msg_bits, i);
+    }
+
+    // 根据新鲜值更新trip reset msg
+    preTrip[TxPduId] = trip_bits.M;
+    resetCnt[TxPduId].preresetdata = reset_bits.M;
+    msgCnt[TxPduId].premsgdata = msg_bits.M;
+}
+
+/**
+ * 裁剪新鲜值
+*/
+FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
+FVM_GetTxFreshness(
+    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
+    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
+    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength) 
+{
+    // reset & prereset
+    ResetCntS_Type current_reset = resetCnt[SecOCFreshnessValueID];
+    ResetState_Type current_resetState = resetState[SecOCFreshnessValueID];
+    bitmap reset_bits = init_from_uint8(current_reset.resetdata, current_reset.ResetCntLength);
+    bitmap prereset_bits = init_from_uint8(current_reset.preresetdata, current_reset.ResetCntLength);
+
+    // trip & preTrip
+    bitmap trip_bits = init_from_uint8(trip[SecOCFreshnessValueID], TripCntLength); // TripCntLengthgth bit
+    bitmap pretrip_bits = init_from_uint8(preTrip[SecOCFreshnessValueID], TripCntLength);
+
+    // msg & premsg
+    MsgCntS_Type current_msg = msgCnt[SecOCFreshnessValueID];
+    bitmap msg_bits = init_from_uint8(current_msg.msgdata, current_msg.MsgCntLength);
+    bitmap premsg_bits = init_from_uint8(current_msg.premsgdata, current_msg.MsgCntLength);
+
+    // resetflag
+    bitmap resetflag_bits = init_from_uint8(current_resetState.resetflag, 2);
+
+    // 拼接trip和resetdata值并判断
+    // 比较trip和pretrip
+    bool equal_flag = true;
+    for (int i = 0; i < TripCntLength; i++) {
+        if (test(trip_bits, i) != test(pretrip_bits, i)) {
+            equal_flag = false;
+            break;
+        }
+    }
+
+    // 比较reset和prereset
+    for (int i = 0; i < current_reset.ResetCntLength; i++) {
+        if (test(reset_bits, i) != test(pretrip_bits, i)) {
+            equal_flag = false;
+            break;
+        }
+    }
+
+    // 相同 则把messagecounter+1 resetflag使用当前flag
+    bitmap can_data_bits = init(sizeof(uint8) * 8); // 64bit
+    uint8 *can_data = (uint8 *)can_data_bits.M;
+    if (equal_flag) {
+        // pretrip: (64-TripCntLength) —— (64-1) bit
+        for (int i = 0; i < TripCntLength; i++) {
+            if (test(pretrip_bits, i))
+                set(can_data_bits, i + 64 - TripCntLength);
+        }
+
+        // prereset: (64-TripCntLength-ResetCntLengthgth) —— (64-TripCntLength-1)
+        for (int i = 0; i < current_reset.ResetCntLength; i++) {
+            if (test(prereset_bits, i)) {
+                set(can_data_bits, i + 64 - TripCntLength - current_reset.ResetCntLength);
+            }
+        }
+
+        // premsg: (64-TripCntLength-ResetCntLength-MsgCntLength) - (64-TripCntLength-ResetCntLengthgth-1)
+        for (int i = 0; i < current_msg.MsgCntLength; i++) {
+            if (test(premsg_bits, i)) {
+                set(can_data_bits, i + 64 - TripCntLength - current_reset.ResetCntLength - current_msg.MsgCntLength);
+            }
+        }
+
+        // reset_flag
+        for (int i = 0; i < 2; i++) {
+            if (test(resetflag_bits, i)) {
+                set(can_data_bits, i + 64 - TripCntLength - current_reset.ResetCntLength - current_msg.MsgCntLength - 2);
+            }
+        }
+    } else {
+        // trip: (64-TripCntLength) —— (64-1) bit
+        for (int i = 0; i < TripCntLength; i++) {
+            if (test(trip_bits, i))
+                set(can_data_bits, i + 64 - TripCntLength);
+        }
+
+        // reset: (64-TripCntLength-ResetCntLengthgth) —— (64-TripCntLength-1)
+        for (int i = 0; i < current_reset.ResetCntLength; i++) {
+            if (test(reset_bits, i)) {
+                set(can_data_bits, i + 64 - TripCntLength - current_reset.ResetCntLength);
+            }
+        }
+
+        // msg: (64-TripCntLength-ResetCntLength-MsgCntLength) - (64-TripCntLength-ResetCntLengthgth-1)
+        for (int i = 0; i < current_msg.MsgCntLength; i++) {
+            if (test(msg_bits, i)) {
+                set(can_data_bits, i + 64 - TripCntLength - current_reset.ResetCntLength - current_msg.MsgCntLength);
+            }
+        }
+
+        // reset_flag
+        for (int i = 0; i < 2; i++) {
+            if (test(resetflag_bits, i)) {
+                set(can_data_bits, i + 64 - TripCntLength - current_reset.ResetCntLength - current_msg.MsgCntLength - 2);
+            }
+        }
+    }
+
+    SecOCFreshnessValue = can_data;
+    return E_OK;
+}
+
+/**
+ * 根据SecOCTruncatedFreshnessValueLength长度截取
+ * 截取msg中后(SecOCTruncatedFreshnessValueLength-2)bit + 2bit(resetflag reset后两位)
+ * 构造SecOCTruncatedFreshnessValue
+*/
+FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
+FvM_GetTxFreshnessTruncData(
+    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
+    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
+    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength,
+    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCTruncatedFreshnessValue,
+    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCTruncatedFreshnessValueLength) 
+{
+    // 获取新鲜值
+    bitmap freshness_bits = init_from_uint8((char *)SecOCFreshnessValue, SecOCFreshnessValueLength);
+    ResetCntS_Type current_reset = resetCnt[SecOCFreshnessValueID];
+    ResetState_Type current_resetState = resetState[SecOCFreshnessValueID];
+    MsgCntS_Type current_msg = msgCnt[SecOCFreshnessValueID];
+
+    uint8 length = TripCntLength + current_reset.ResetCntLength + SecOCTruncatedFreshnessValueLength - 2 + 2;
+    SecOCTruncatedFreshnessValueLength = &length;
+    bitmap truncatedFreshness_bits = init_from_uint8(SecOCTruncatedFreshnessValue, length);
+
+    // 获取trip
+    for (int i = 0; i < TripCntLength; i++) {
+        if (test(freshness_bits, i + 64 - TripCntLength)) {
+            set(truncatedFreshness_bits, i + 64 - TripCntLength);
+        }
+    }
+
+    // 获取reset
+    for (int i = 0; i < current_reset.ResetCntLength; i++) {
+        if (test(freshness_bits, i + 64 - TripCntLength - current_reset.ResetCntLength)) {
+            set(truncatedFreshness_bits, i + 64 - TripCntLength - current_reset.ResetCntLength);
+        }
+    }
+
+    // 裁剪msg
+    for (int i = 0; i < SecOCTruncatedFreshnessValueLength - 2; i++) {
+        if (test(freshness_bits, i + 64 - TripCntLength - current_reset.ResetCntLength - current_msg.MsgCntLength)) {
+            set(truncatedFreshness_bits, i + 64 - TripCntLength - current_reset.ResetCntLength - current_msg.MsgCntLength + 2);
+        }
+    }
+
+    // 获取reset_flag
+    bitmap resetflag_bits = init(2);
+    for (int i = 0; i < 2; i++) {
+        if (test(freshness_bits, i + 64 - TripCntLength - current_reset.ResetCntLength - current_msg.MsgCntLength + 2 - 2)) {
+            set(truncatedFreshness_bits, i);
+        }
+    }
 
     return E_OK;
 }

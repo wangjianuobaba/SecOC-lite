@@ -16,9 +16,16 @@ typedef struct
 {
     uint8 *resetdata;
     uint8 *preresetdata;
-    uint8 ResetCntLengthgth;
+    uint8 ResetCntLength;
     uint16 resetcanid;
 } ResetCntS_Type;
+
+typedef struct
+{
+    uint8 *msgdata;
+    uint8 *premsgdata;
+    uint8 MsgCntLength;
+} MsgCntS_Type;
 
 //slaveFVM_Cfg.h
 
