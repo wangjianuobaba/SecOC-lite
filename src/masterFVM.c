@@ -142,6 +142,8 @@ MasterFVM_getTripValue(P2VAR(PduInfoType, AUTOMATIC, SECOC_APPL_DATA)PduInfoPtr)
     get_value(trip_can_id, PduInfoPtr, TripCntLength, 0);
 }
 
+ResetCnt_Type resetCnt[2];
+
 FUNC(void, MASTER_CODE)
 MasterFVM_getResetValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
                         P2VAR(PduInfoType, AUTOMATIC, SECOC_APPL_DATA)PduInfoPtr) {

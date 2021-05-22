@@ -31,21 +31,18 @@ typedef struct {
 } PduInfoType; //数据信息  包括数据指针，meta数据指针，pdu长度
 
 typedef struct {
-    uint8 *resetdata;
-    uint8 ResetCntLength;
-    uint16 resetcanid;
-    uint32 resetSyntag;
-    uint32 resetSynTime;
-} ResetCnt_Type;
-
-typedef struct {
     uint8 resetflag;
     uint8 resetloss;
     uint32 resetTag;
     uint32 resetTime;
 } ResetState_Type;
 
-// ResetCnt_Type resetCnt[2];
+// Csm_Types.h
+typedef uint8 Crypto_OperationModeType;
+
+// masterFVM.c
+uint32 jobId = 2333;               // 自定义
+Crypto_OperationModeType mode = 3; // 自定义
 
 // -------------------------------
 
