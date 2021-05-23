@@ -40,10 +40,6 @@ typedef struct {
 // Csm_Types.h
 typedef uint8 Crypto_OperationModeType;
 
-// masterFVM.c
-uint32 jobId = 2333;               // 自定义
-Crypto_OperationModeType mode = 3; // 自定义
-
 // -------------------------------
 
 // compiler_Cfg.h
