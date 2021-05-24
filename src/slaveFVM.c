@@ -7,6 +7,26 @@ extern uint8 trip[3];               // trip报文
 uint8 TripCntLength = 16; //可配置
 uint16 ackid = 0x2be;        //返回的ack报文  可配置
 
+uint8 preTrip[3 * NUM_MSG];
+
+uint8 msgData[6 * NUM_MSG];
+uint8 preMsgData[6 * NUM_MSG];
+
+uint8 resetData[3 * NUM_RESET];
+uint8 preresetData[3 * NUM_MSG];
+
+ResetCntS_Type resetCnt[] = {
+    {
+        .resetdata = resetData,
+        .preresetdata = preresetData,
+        .ResetCntLength = 15,
+
+    },
+    {.resetdata = resetData,
+     .preresetdata = preresetData,
+     .ResetCntLength = 17,
+     .resetcanid = 0x66}};
+
 /**
  * 更新trip报文
 */
@@ -168,24 +188,6 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId, P2CONST(PduInfoType,
 
     return E_OK;
 }
-
-uint8 preTrip[3 * NUM_MSG];
-uint8 msgData[6 * NUM_MSG];
-uint8 preMsgData[6 * NUM_MSG];
-
-ResetCntS_Type resetCnt[] = {
-    {
-        .resetdata = resetData,
-        .preresetdata = preresetData,
-        .ResetCntLength = 15,
-
-    }, {
-        .resetdata = resetData,
-        .preresetdata = preresetData,
-        .ResetCntLength = 17,
-        .resetcanid = 0x66
-    }
-};
 
 MsgCntS_Type msgCnt[] = {
     {
@@ -393,3 +395,50 @@ FvM_GetTxFreshnessTruncData(
 
     return E_OK;
 }
+
+
+// 构造新鲜值的标志
+enum SYMBOL
+{
+    F1_1=1, F1_2, F1_3,
+    F2_1,   F2_2, F2_3,
+    F3_1,   F3_2, F3_3,
+    F4_1,   F4_2, F4_3,
+    F5_1,   F5_2, F5_3,
+};
+
+/**
+ * 构造新鲜值
+*/
+// FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
+// FVM_GetRxFreshness(
+//     P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST) SecOCTruncatedFreshnessValue,
+//     VAR(uint32, FRESH_VAR) SecOCTruncatedFreshnessValueLength,
+//     VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,
+//     P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
+//     P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength) 
+// {
+//     // 获得新鲜值
+//     bitmap truncatedFreshness_bits = init_from_uint8(SecOCTruncatedFreshnessValue, SecOCFreshnessValueLength);
+//     enum SYMBOL flags;
+
+//     bitmap trip_bits = init(TripCntLength); // TripCntLengthgth bit
+//     bitmap pretrip_bits = init(TripCntLength);
+
+//     // 获取reset flag
+
+//     // 获取reset & prereset
+
+//     // 获取trip & pretrip
+
+//     // 获取upper_msg & lower_msg
+
+//     // 计算新鲜值
+//     uint8 length;
+//     bitmap freshness_bits = init_from_uint8(SecOCFreshnessValue, length);
+//     switch (flags) {
+//         case F1_1: {
+//             for () {}
+//         } break;
+//     }
+// }
