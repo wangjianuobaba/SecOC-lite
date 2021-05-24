@@ -21,6 +21,8 @@ typedef struct
     uint32 resetSynTime;
 } ResetCnt_Type;
 
+ResetCnt_Type resetCnt[2];
+
 // void MasterFVM_Init(void);
 FUNC(void, MASTER_CODE)
 MasterFVM_Init();
