@@ -468,70 +468,70 @@ FVM_GetRxFreshness(
     MsgCntS_Type current_msg = msgCnt[SecOCFreshnessValueID];
     bitmap msg_bits = init_from_uint8(current_msg.msgdata, current_msg.MsgCntLength);
     bitmap premsg_bits = init_from_uint8(current_msg.premsgdata, current_msg.MsgCntLength);
-    // lowermsg
-    uint64 latest_msg = bit2uint64(premsg_bits, 16);
-    uint64 received_msg = bit2uint64(msg_bits, 16);
-
-    // 比较
-    enum SYMBOL flags; // 构造标志
-    if (received_resetflag == latest_resetflag) {
-        if (received_tripreset == latest_tripreset) {
-            if (received_msg > latest_msg) {
-                //
-            } else {
-                //
-            }
-        } else if (received_tripreset < latest_tripreset) {
-            // 
-        }
-    } else if (received_resetflag == latest_resetflag - 1) {
-        if (received_tripreset == latest_tripreset - 1) {
-            if (received_msg > latest_msg) {
-                //
-            } else {
-                //
-            }
-        } else if (received_tripreset < latest_tripreset - 1) {
-            //
-        }
-    } else if (received_resetflag == latest_resetflag + 1) {
-        if (received_tripreset == latest_tripreset + 1) {
-            if (received_msg > latest_msg) {
-                //
-            } else {
-                //
-            }
-        } else if (received_tripreset < latest_tripreset + 1) {
-            //
-        }
-    } else if (received_resetflag == latest_resetflag - 2) {
-        if (received_tripreset == latest_tripreset - 2) {
-            if (received_msg > latest_msg) {
-                //
-            } else {
-                //
-            }
-        } else if (received_tripreset < latest_tripreset - 2) {
-            //
-        }
-    } else if (received_resetflag == latest_resetflag + 2) {
-        if (received_tripreset == latest_tripreset + 2) {
-            if (received_msg > latest_msg) {
-                //
-            } else {
-                //
-            }
-        } else if (received_tripreset < latest_tripreset + 2) {
-            //
-        }
+    // lowermsg & uppermsg
+    uint64 uppermsg = 0;
+    uint64 latest_lowermsg = bit2uint64(premsg_bits, 16);
+    uint64 received_lowermsg = bit2uint64(msg_bits, 16);
+    int index = (32 + 8 - 1) / 8;
+    for (int i = 2; i < index; i++) {
+        uppermsg <<= ((i - 2) * 8);
+        uppermsg |= premsg_bits.M[i];
     }
 
+    // 比较 & 构造新鲜值
     // 计算新鲜值
     uint8 length;
     bitmap freshness_bits = init_from_uint8(SecOCFreshnessValue, length);
-    // switch (flags) {
-    //     case F1_1: {
-    //         for () {}
-    //     } break;
-    // }
+    enum SYMBOL flags; // 构造标志
+    if (received_resetflag == latest_resetflag) {
+        if (received_tripreset == latest_tripreset) {
+            if (received_lowermsg > latest_lowermsg) {
+                flags = F1_1;
+            } else {
+                flags = F1_2;
+            }
+        } else if (received_tripreset < latest_tripreset) {
+            flags = F1_3;
+        }
+    } else if (received_resetflag == latest_resetflag - 1) {
+        if (received_tripreset == latest_tripreset - 1) {
+            if (received_lowermsg > latest_lowermsg) {
+                flags = F2_1;
+            } else {
+                flags = F2_2;
+            }
+        } else if (received_tripreset < latest_tripreset - 1) {
+            flags = F2_3;
+        }
+    } else if (received_resetflag == latest_resetflag + 1) {
+        if (received_tripreset == latest_tripreset + 1) {
+            if (received_lowermsg > latest_lowermsg) {
+                flags = F3_1;
+            } else {
+                flags = F3_2;
+            }
+        } else if (received_tripreset < latest_tripreset + 1) {
+            flags = F3_3;
+        }
+    } else if (received_resetflag == latest_resetflag - 2) {
+        if (received_tripreset == latest_tripreset - 2) {
+            if (received_lowermsg > latest_lowermsg) {
+                flags = F4_1;
+            } else {
+                flags = F4_2;
+            }
+        } else if (received_tripreset < latest_tripreset - 2) {
+            flags = F4_3;
+        }
+    } else if (received_resetflag == latest_resetflag + 2) {
+        if (received_tripreset == latest_tripreset + 2) {
+            if (received_lowermsg > latest_lowermsg) {
+                flags = F5_1;
+            } else {
+                flags = F5_2;
+            }
+        } else if (received_tripreset < latest_tripreset + 2) {
+            flags = F5_3;
+        }
+    }
 }
