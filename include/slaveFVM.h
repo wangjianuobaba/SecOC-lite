@@ -86,6 +86,7 @@ FvM_GetTxFreshnessTruncData(
 // );
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
 FVM_GetRxFreshness(
+    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
     P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST) SecOCTruncatedFreshnessValue,
     VAR(uint32, FRESH_VAR) SecOCTruncatedFreshnessValueLength,
     VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,

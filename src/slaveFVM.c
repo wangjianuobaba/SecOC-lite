@@ -244,7 +244,6 @@ FVM_GetTxFreshness(
 {
     // reset & prereset
     ResetCntS_Type current_reset = resetCnt[SecOCFreshnessValueID];
-    ResetState_Type current_resetState = resetState[SecOCFreshnessValueID];
     bitmap reset_bits = init_from_uint8(current_reset.resetdata, current_reset.ResetCntLength);
     bitmap prereset_bits = init_from_uint8(current_reset.preresetdata, current_reset.ResetCntLength);
 
@@ -258,6 +257,7 @@ FVM_GetTxFreshness(
     bitmap premsg_bits = init_from_uint8(current_msg.premsgdata, current_msg.MsgCntLength);
 
     // resetflag
+    ResetState_Type current_resetState = resetState[SecOCFreshnessValueID];
     bitmap resetflag_bits = init_from_uint8(current_resetState.resetflag, 2);
 
     // 拼接trip和resetdata值并判断
@@ -410,35 +410,128 @@ enum SYMBOL
 /**
  * 构造新鲜值
 */
-// FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
-// FVM_GetRxFreshness(
-//     P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST) SecOCTruncatedFreshnessValue,
-//     VAR(uint32, FRESH_VAR) SecOCTruncatedFreshnessValueLength,
-//     VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,
-//     P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
-//     P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength) 
-// {
-//     // 获得新鲜值
-//     bitmap truncatedFreshness_bits = init_from_uint8(SecOCTruncatedFreshnessValue, SecOCFreshnessValueLength);
-//     enum SYMBOL flags;
+FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
+FVM_GetRxFreshness(
+    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
+    P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST) SecOCTruncatedFreshnessValue,
+    VAR(uint32, FRESH_VAR) SecOCTruncatedFreshnessValueLength,
+    VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,
+    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
+    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength)
+{
+    // 获得新鲜值
+    bitmap truncatedFreshness_bits = init_from_uint8(SecOCTruncatedFreshnessValue, SecOCFreshnessValueLength);
 
-//     bitmap trip_bits = init(TripCntLength); // TripCntLengthgth bit
-//     bitmap pretrip_bits = init(TripCntLength);
+    // 获取reset_flag $ pre_reset_flag
+    ResetState_Type current_resetState = resetState[SecOCFreshnessValueID];
+    uint8 latest_resetflag = current_resetState.resetflag;
+    uint8 received_resetflag = 0;
+    for (int i = 0; i < 2; i++) {
+        if (test(truncatedFreshness_bits, i))
+            received_resetflag += (1 << i);
+    }
 
-//     // 获取reset flag
+    // 获取trip & pretrip
+    bitmap trip_bits = init_from_uint8(trip[SecOCFreshnessValueID], TripCntLength); // TripCntLengthgth bit
+    bitmap pretrip_bits = init_from_uint8(preTrip[SecOCFreshnessValueID], TripCntLength);
+    // 获取reset & prereset
+    ResetCntS_Type current_reset = resetCnt[SecOCFreshnessValueID];
+    bitmap reset_bits = init_from_uint8(current_reset.resetdata, current_reset.ResetCntLength);
+    bitmap prereset_bits = init_from_uint8(current_reset.preresetdata, current_reset.ResetCntLength);
 
-//     // 获取reset & prereset
+    int tr_length = TripCntLength + current_reset.ResetCntLength;
+    // trip | reset
+    bitmap tripreset_bits = init(tr_length);
+    for (int i = 0; i < TripCntLength; i++) {
+        if (test(trip_bits, i))
+            set(tripreset_bits, i + tr_length - TripCntLength);
+    }
+    for (int i = 0; i < current_reset.ResetCntLength; i++) {
+        if (test(reset_bits, i))
+            set(tripreset_bits, i);
+    }
+    // pretrip | prereset
+    bitmap pretripreset_bits = init(tr_length);
+    for (int i = 0; i < TripCntLength; i++) {
+        if (test(pretrip_bits, i))
+            set(pretripreset_bits, i + tr_length - TripCntLength);
+    }
+    for (int i = 0; i < current_reset.ResetCntLength; i++) {
+        if (test(prereset_bits, i))
+            set(pretripreset_bits, i);
+    }
+    // tripreset value
+    uint64 latest_tripreset = bit2uint64(pretripreset_bits, tr_length);
+    uint64 received_tripreset = bit2uint64(tripreset_bits, tr_length);
 
-//     // 获取trip & pretrip
+    // 获取msg &premsg
+    MsgCntS_Type current_msg = msgCnt[SecOCFreshnessValueID];
+    bitmap msg_bits = init_from_uint8(current_msg.msgdata, current_msg.MsgCntLength);
+    bitmap premsg_bits = init_from_uint8(current_msg.premsgdata, current_msg.MsgCntLength);
+    // lowermsg
+    uint64 latest_msg = bit2uint64(premsg_bits, 16);
+    uint64 received_msg = bit2uint64(msg_bits, 16);
 
-//     // 获取upper_msg & lower_msg
+    // 比较
+    enum SYMBOL flags; // 构造标志
+    if (received_resetflag == latest_resetflag) {
+        if (received_tripreset == latest_tripreset) {
+            if (received_msg > latest_msg) {
+                //
+            } else {
+                //
+            }
+        } else if (received_tripreset < latest_tripreset) {
+            // 
+        }
+    } else if (received_resetflag == latest_resetflag - 1) {
+        if (received_tripreset == latest_tripreset - 1) {
+            if (received_msg > latest_msg) {
+                //
+            } else {
+                //
+            }
+        } else if (received_tripreset < latest_tripreset - 1) {
+            //
+        }
+    } else if (received_resetflag == latest_resetflag + 1) {
+        if (received_tripreset == latest_tripreset + 1) {
+            if (received_msg > latest_msg) {
+                //
+            } else {
+                //
+            }
+        } else if (received_tripreset < latest_tripreset + 1) {
+            //
+        }
+    } else if (received_resetflag == latest_resetflag - 2) {
+        if (received_tripreset == latest_tripreset - 2) {
+            if (received_msg > latest_msg) {
+                //
+            } else {
+                //
+            }
+        } else if (received_tripreset < latest_tripreset - 2) {
+            //
+        }
+    } else if (received_resetflag == latest_resetflag + 2) {
+        if (received_tripreset == latest_tripreset + 2) {
+            if (received_msg > latest_msg) {
+                //
+            } else {
+                //
+            }
+        } else if (received_tripreset < latest_tripreset + 2) {
+            //
+        }
+    }
 
-//     // 计算新鲜值
-//     uint8 length;
-//     bitmap freshness_bits = init_from_uint8(SecOCFreshnessValue, length);
-//     switch (flags) {
-//         case F1_1: {
-//             for () {}
-//         } break;
-//     }
-// }
+    // 计算新鲜值
+    uint8 length;
+    bitmap freshness_bits = init_from_uint8(SecOCFreshnessValue, length);
+    // switch (flags) {
+    //     case F1_1: {
+    //         for () {}
+    //     } break;
+    // }
+}

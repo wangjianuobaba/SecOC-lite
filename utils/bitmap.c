@@ -56,3 +56,13 @@ char *bit2string(bitmap b, int n)
         s[i] = test(b, i) ? '1' : '0';
     return s;
 }
+
+uint64 bit2uint64(bitmap b, int n) {
+    uint8 length = (n + 8 - 1) / 8;
+    uint64 value = 0;
+    for (int i = 0; i < length; i++) {
+        value <<= (i * 8);
+        value |= b.M[i];
+    }
+    return value;
+}

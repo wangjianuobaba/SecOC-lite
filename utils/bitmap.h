@@ -27,5 +27,6 @@ void set(bitmap b, int k); //设置比特位
 void clear(bitmap b, int k); //清除比特位
 bool test(bitmap b, int k); //测试比特位
 
-// 打印为字符串
-char *bit2string(bitmap b, int n);
+// 接口
+char *bit2string(bitmap b, int n); // 打印为字符串
+uint64 bit2uint64(bitmap b, int n); // 返回
