@@ -1,5 +1,6 @@
 #ifndef _SLAVEFVM_H
 #define _SLAVEFVM_H
+
 #include "Compiler.h"
 #include "platform_Types.h"
 #include "bitmap.h"
@@ -12,16 +13,14 @@
 #define SYN_ERROR_SIZE 3
 
 //slaveFVM_Types.h
-typedef struct
-{
+typedef struct {
     uint8 *resetdata;
     uint8 *preresetdata;
     uint8 ResetCntLength;
     uint16 resetcanid;
 } ResetCntS_Type;
 
-typedef struct
-{
+typedef struct {
     uint8 *msgdata;
     uint8 *premsgdata;
     uint8 MsgCntLength;
@@ -30,8 +29,7 @@ typedef struct
 //slaveFVM_Cfg.h
 
 //Std_Types.h
-typedef enum
-{
+typedef enum {
     E_OK,
     E_NOT_OK,
 } Std_ReturnType;
@@ -45,11 +43,12 @@ typedef uint8 PduIdType;
 
 // Std_ReturnType FVM_updateTrip(const PduInfoType* PduInfoPtr );  //更新trip值
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
-FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST) PduInfoPtr);
+FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr);
 
 // Std_ReturnType FVM_updateReset(PduIdType TxPduId, const PduInfoType* PduInfoPtr);  //更新reset值
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
-FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId, P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST) PduInfoPtr);
+FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
+                P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr);
 
 // Std_ReturnType FVM_GetTxFreshness (
 // 	uint16 SecOCFreshnessValueID,
@@ -58,9 +57,9 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId, P2CONST(PduInfoType,
 // );
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
 FVM_GetTxFreshness(
-    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
-    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
-    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength);
+        VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
+        P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValue,
+        P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValueLength);
 
 // Std_ReturnType FvM_GetTxFreshnessTruncData (
 // 	uint16 SecOCFreshnessValueID,
@@ -71,11 +70,11 @@ FVM_GetTxFreshness(
 // );
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
 FvM_GetTxFreshnessTruncData(
-    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
-    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
-    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength,
-    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCTruncatedFreshnessValue,
-    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCTruncatedFreshnessValueLength);
+        VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
+        P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValue,
+        P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValueLength,
+        P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA)SecOCTruncatedFreshnessValue,
+        P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA)SecOCTruncatedFreshnessValueLength);
 
 // Std_ReturnType FVM_GetRxFreshness (uint16 SecOCFreshnessValueID,
 //     const uint8* SecOCTruncatedFreshnessValue,
@@ -105,18 +104,20 @@ FVM_GetRxFreshness(
 // );
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
 FVM_GetRxFreshnessAuthData(
-    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
-    P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST) SecOCTruncatedFreshnessValue,
-    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCTruncatedFreshnessValueLength,
-    P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST) SecOCAuthDataFreshnessValue,
-    VAR(uint16, FRESH_VAR) SecOCAuthDataFreshnessValueLength,
-    VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,
-    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
-    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength);
+        VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
+        P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST)SecOCTruncatedFreshnessValue,
+        P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA)SecOCTruncatedFreshnessValueLength,
+        P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST)SecOCAuthDataFreshnessValue,
+        VAR(uint16, FRESH_VAR) SecOCAuthDataFreshnessValueLength,
+        VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,
+        P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValue,
+        P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValueLength);
 
 // void FVM_updatePreValue(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
 FUNC(void, SLAVE_CODE)
-FVM_updatePreValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId, P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST) PduInfoPtr);
+FVM_updatePreValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
+                   P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValue);
+
 
 // void updatePreRxValue(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
 
