@@ -438,6 +438,10 @@ FVM_GetRxFreshness(
     ResetCntS_Type current_reset = resetCnt[SecOCFreshnessValueID];
     bitmap reset_bits = init_from_uint8(current_reset.resetdata, current_reset.ResetCntLength);
     bitmap prereset_bits = init_from_uint8(current_reset.preresetdata, current_reset.ResetCntLength);
+    // 获取 msg&premsg
+    MsgCntS_Type current_msg = msgCnt[SecOCFreshnessValueID];
+    bitmap msg_bits = init_from_uint8(current_msg.msgdata, current_msg.MsgCntLength);
+    bitmap premsg_bits = init_from_uint8(current_msg.premsgdata, current_msg.MsgCntLength);
 
     int tr_length = TripCntLength + current_reset.ResetCntLength;
     // trip | reset
@@ -460,23 +464,16 @@ FVM_GetRxFreshness(
         if (test(prereset_bits, i))
             set(pretripreset_bits, i);
     }
-    // tripreset value
-    uint64 latest_tripreset = bit2uint64(pretripreset_bits, tr_length);
-    uint64 received_tripreset = bit2uint64(tripreset_bits, tr_length);
 
-    // 获取msg &premsg
-    MsgCntS_Type current_msg = msgCnt[SecOCFreshnessValueID];
-    bitmap msg_bits = init_from_uint8(current_msg.msgdata, current_msg.MsgCntLength);
-    bitmap premsg_bits = init_from_uint8(current_msg.premsgdata, current_msg.MsgCntLength);
-    // lowermsg & uppermsg
-    uint64 uppermsg = 0;
-    uint64 latest_lowermsg = bit2uint64(premsg_bits, 16);
-    uint64 received_lowermsg = bit2uint64(msg_bits, 16);
-    int index = (32 + 8 - 1) / 8;
-    for (int i = 2; i < index; i++) {
-        uppermsg <<= ((i - 2) * 8);
-        uppermsg |= premsg_bits.M[i];
-    }
+    // latest_reset value
+    uint64 latest_value = bit2uint64(reset_bits, 32, current_reset.ResetCntLength);
+    // tripreset value
+    uint64 latest_tripreset = bit2uint64(pretripreset_bits, 0, tr_length);
+    uint64 received_tripreset = bit2uint64(tripreset_bits, 0, tr_length);
+    // lowermsg&uppermsg value
+    uint64 uppermsg = bit2uint64(premsg_bits, 16, 16);
+    uint64 latest_lowermsg = bit2uint64(premsg_bits, 0, 16);
+    uint64 received_lowermsg = bit2uint64(msg_bits, 0, 16);
 
     // 比较 & 构造新鲜值
     // 计算新鲜值
@@ -484,26 +481,39 @@ FVM_GetRxFreshness(
     bitmap freshness_bits = init_from_uint8(SecOCFreshnessValue, length);
     enum SYMBOL flags; // 构造标志
     if (received_resetflag == latest_resetflag) {
+
         if (received_tripreset == latest_tripreset) {
+
             if (received_lowermsg > latest_lowermsg) {
                 flags = F1_1;
             } else {
                 flags = F1_2;
             }
+
         } else if (received_tripreset < latest_tripreset) {
             flags = F1_3;
+            copy(freshness_bits, 32, reset_bits, current_reset.ResetCntLength);
         }
+
     } else if (received_resetflag == latest_resetflag - 1) {
+
         if (received_tripreset == latest_tripreset - 1) {
+
             if (received_lowermsg > latest_lowermsg) {
                 flags = F2_1;
             } else {
                 flags = F2_2;
             }
+
         } else if (received_tripreset < latest_tripreset - 1) {
             flags = F2_3;
+            latest_value -= 1;
+            freshness_bits.M[4] = (uint8)latest_value;
+            freshness_bits.M[5] = latest_value >> 8;
         }
+
     } else if (received_resetflag == latest_resetflag + 1) {
+
         if (received_tripreset == latest_tripreset + 1) {
             if (received_lowermsg > latest_lowermsg) {
                 flags = F3_1;
@@ -512,8 +522,13 @@ FVM_GetRxFreshness(
             }
         } else if (received_tripreset < latest_tripreset + 1) {
             flags = F3_3;
+            latest_value += 1;
+            freshness_bits.M[4] = (uint8)latest_value;
+            freshness_bits.M[5] = latest_value >> 8;
         }
+
     } else if (received_resetflag == latest_resetflag - 2) {
+
         if (received_tripreset == latest_tripreset - 2) {
             if (received_lowermsg > latest_lowermsg) {
                 flags = F4_1;
@@ -522,9 +537,15 @@ FVM_GetRxFreshness(
             }
         } else if (received_tripreset < latest_tripreset - 2) {
             flags = F4_3;
+            latest_value -= 2;
+            freshness_bits.M[4] = (uint8)latest_value;
+            freshness_bits.M[5] = latest_value >> 8;
         }
+
     } else if (received_resetflag == latest_resetflag + 2) {
+
         if (received_tripreset == latest_tripreset + 2) {
+
             if (received_lowermsg > latest_lowermsg) {
                 flags = F5_1;
             } else {
@@ -532,6 +553,42 @@ FVM_GetRxFreshness(
             }
         } else if (received_tripreset < latest_tripreset + 2) {
             flags = F5_3;
+            latest_value += 2;
+            freshness_bits.M[4] = (uint8)latest_value;
+            freshness_bits.M[5] = latest_value >> 8;
         }
+        
     }
+
+    switch (flags) {
+        case F1_1: case F2_1: case F3_1: case F4_1: case F5_1: {
+            // trip
+            copy(freshness_bits, TripCntLength + current_reset.ResetCntLength + 16 + 16, pretrip_bits, TripCntLength);
+            // reset
+            copy(freshness_bits, current_reset.ResetCntLength + 16 + 16, prereset_bits, current_reset.ResetCntLength);
+            // upper_msg
+            copy(freshness_bits, 16, premsg_bits, 16);
+        } break;
+
+        case F1_2: case F2_2: case F3_2: case F4_2: case F5_2: {
+            // trip
+            copy(freshness_bits, TripCntLength + current_reset.ResetCntLength + 16 + 16, pretrip_bits, TripCntLength);
+            // reset
+            copy(freshness_bits, current_reset.ResetCntLength + 16 + 16, prereset_bits, current_reset.ResetCntLength);
+            // upper_msg
+            uppermsg++;
+            freshness_bits.M[2] = (uint8)uppermsg;
+            freshness_bits.M[3] = uppermsg >> 8;
+        } break;
+
+        case F1_3: case F2_3: case F3_3: case F4_3: case F5_3: {
+            // trip
+            copy(freshness_bits, TripCntLength + current_reset.ResetCntLength + 16 + 16, trip_bits, TripCntLength);
+            // upper_msg
+            freshness_bits.M[2] &= 0;
+            freshness_bits.M[3] &= 0;
+        } break;
+    }
+    // lower_msg
+    copy(freshness_bits, 0, premsg_bits, 16);
 }

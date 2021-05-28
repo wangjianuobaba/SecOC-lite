@@ -57,12 +57,23 @@ char *bit2string(bitmap b, int n)
     return s;
 }
 
-uint64 bit2uint64(bitmap b, int n) {
-    uint8 length = (n + 8 - 1) / 8;
+uint64 bit2uint64(bitmap b, int start, int n) {
+    uint8 start_index = (start + 8 - 1) / 8;
+    uint8 length = (start + n + 8 - 1) / 8;
     uint64 value = 0;
-    for (int i = 0; i < length; i++) {
-        value <<= (i * 8);
+    for (int i = start_index; i < length; i++) {
+        value <<= ((i - start_index) * 8);
         value |= b.M[i];
     }
     return value;
 }
+
+void copy(bitmap b, int start, bitmap data, int n) {
+    //bitmap temp = init_from_uint8(data, n);
+    for (int i = 0; i < n; i++) {
+        if (test(data, i))
+            set(b, start + i);
+    }
+}
+
+//void copyofuint(bitmap b, uint8 start, uint64 data, int n) {}

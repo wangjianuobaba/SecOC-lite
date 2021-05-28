@@ -29,4 +29,6 @@ bool test(bitmap b, int k); //测试比特位
 
 // 接口
 char *bit2string(bitmap b, int n); // 打印为字符串
-uint64 bit2uint64(bitmap b, int n); // 返回
+uint64 bit2uint64(bitmap b, int start, int n); // 返回
+void copy(bitmap b, int start, bitmap data, int n); // 拷贝
+//void copyofuint(bitmap b, int start, uint64 data, int n); // 拷贝
