@@ -15,6 +15,8 @@ uint8 preMsgData[6 * NUM_MSG];
 uint8 resetData[3 * NUM_RESET];
 uint8 preresetData[3 * NUM_MSG];
 
+uint8 *verifyPtr;
+
 ResetCntS_Type resetCnt[] = {
         {
                 .resetdata = resetData,
@@ -79,7 +81,8 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
 
     // Csm验证
     bitmap verifyPtr_bits = init(TripCntLength + 1);
-    uint8 *verifyPtr = (uint8 *) verifyPtr_bits.M;
+    verifyPtr = (uint8 *) verifyPtr_bits.M;
+
     // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
     //     return E_NOT_OK;
     memset(trip, 0, sizeof(trip));
@@ -172,7 +175,7 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
 
     // Csm验证
     bitmap verifyPtr_bits = init(TripCntLength + 1);
-    uint8 *verifyPtr = (uint8 *) verifyPtr_bits.M;
+    verifyPtr = (uint8 *) verifyPtr_bits.M;
     // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
     //     return E_NOT_OK;
     memset(trip, 0, sizeof(trip));
