@@ -19,6 +19,7 @@ typedef struct {
     uint8 ResetCntLength;
     uint16 resetcanid;
 } ResetCntS_Type;
+ResetCntS_Type resetCnt[2];
 
 typedef struct {
     uint8 *msgdata;
@@ -26,8 +27,11 @@ typedef struct {
     uint8 MsgCntLength;
 } MsgCntS_Type;
 
+ResetState_Type resetState[2];
 //slaveFVM_Cfg.h
-
+uint8 trip[3];
+uint8 preTrip[3 * NUM_MSG];
+MsgCntS_Type msgCnt[2];
 //Std_Types.h
 typedef enum {
     E_OK,
@@ -85,12 +89,12 @@ FvM_GetTxFreshnessTruncData(
 // );
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
 FVM_GetRxFreshness(
-    VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
-    P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST) SecOCTruncatedFreshnessValue,
-    VAR(uint32, FRESH_VAR) SecOCTruncatedFreshnessValueLength,
-    VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,
-    P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValue,
-    P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA) SecOCFreshnessValueLength);
+        VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
+        P2CONST(uint8, SLAVE_CODE, SLAVE_APPL_CONST)SecOCTruncatedFreshnessValue,
+        VAR(uint32, FRESH_VAR) SecOCTruncatedFreshnessValueLength,
+        VAR(uint16, FRESH_VAR) SecOCAuthVerifyAttempts,
+        P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValue,
+        P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValueLength);
 
 // Std_ReturnType FVM_GetRxFreshnessAuthData (
 // 	uint16 SecOCFreshnessValueID,
