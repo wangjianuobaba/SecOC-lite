@@ -147,8 +147,66 @@ void getRxFreshness_test() {
         }
     }
 }
+/**
+ * 两种情况，等或不等
+ *
+ *
+ */
+void GetTxFreshness_test(){
+    uint16 id = 0;
+    uint8 reset_data[2];
+    uint8 pre_reset_data[2];
+    resetCnt[id].resetdata = reset_data;
+    resetCnt[id].preresetdata = pre_reset_data;
+    uint8 msg_data[2];
+    uint8 pre_msg_data[2];
+    msgCnt[0].msgdata = msg_data;
+    msgCnt[0].premsgdata = pre_msg_data;
+    trip[id] = 1;
+    preTrip[id]=1;
+    uint8 *fv,*fvlen;
+    FVM_GetTxFreshness(id,fv,fvlen);
+    //全pre， msg+1
+    assert(*fv==0x6E);
+
+    id = 1;
+    reset_data[1] = 1;
+    pre_reset_data[1] = 2;
+    msg_data[1] = 1;
+    pre_msg_data[1] =2;
+    trip[id]=2;
+    preTrip[id]=2;
+    FVM_GetTxFreshness(id,fv,fvlen);
+    //全last，msg=init+1
+    assert(*fv==0x71);
+    return;
+}
+
+void updatePreValue_test(){
+    //三个值均为1
+    //0 16 15 16
+    int TxPduId = 0;
+    uint8 * fv ,fv2[]={0,1,1,0,0,1,0,1};
+    fv=fv2;
+    FVM_updatePreValue(TxPduId,fv);
+
+    assert(preTrip[TxPduId]==240);
+    assert(resetCnt[TxPduId].preresetdata == 1);
+    assert(msgCnt[TxPduId].premsgdata == 1);
+    //1 16 17 26
+    TxPduId = 1;
+    bitmap fv3= init_from_uint8(8796160131073,64);
+    FVM_updatePreValue(TxPduId,fv3.M);
+    assert(preTrip[TxPduId]==1);
+    assert(resetCnt[TxPduId].preresetdata == 1);
+    assert(msgCnt[TxPduId].premsgdata == 1);
+
+    return;
+}
 
 int main(int argc, char const *argv[]) {
     getRxFreshness_test();
+    updatePreValue_test();
+    GetTxFreshness_test();
     return 0;
 }
