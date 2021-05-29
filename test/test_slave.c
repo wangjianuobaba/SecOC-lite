@@ -15,7 +15,7 @@ void trip_test() {
     FVM_updateTrip(pduinfo_ptr);
     bitmap trip_bits = init_from_uint8(trip, sizeof(trip) * 8);
 
-    printf(bit2string(trip_bits, 24));
+    printf("%s", bit2string(trip_bits, 24));
 }
 
 int main(int argc, char const *argv[]) {
