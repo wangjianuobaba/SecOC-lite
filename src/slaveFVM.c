@@ -24,7 +24,8 @@ ResetCntS_Type resetCnt[] = {
                 .ResetCntLength = 15,
 
         },
-        {.resetdata = resetData,
+        {
+                .resetdata = resetData,
                 .preresetdata = preresetData,
                 .ResetCntLength = 17,
                 .resetcanid = 0x66}
@@ -498,7 +499,7 @@ FVM_GetRxFreshness(
 
         } else if (received_tripreset < latest_tripreset) {
             flags = F1_3;
-            copy(freshness_bits, 0, pretripreset_bits, TripCntLength+current_reset.ResetCntLength);
+            copy(freshness_bits, 0, pretripreset_bits, TripCntLength + current_reset.ResetCntLength);
         }
 
     } else if (received_resetflag == latest_resetflag - 1) {

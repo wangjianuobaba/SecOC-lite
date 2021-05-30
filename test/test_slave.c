@@ -17,6 +17,8 @@ void trip_test() {
     printf("%s", bit2string(trip_bits, 24));
 }
 
+void
+
 void getRxFreshness_test() {
     uint16 id = 0;
 
