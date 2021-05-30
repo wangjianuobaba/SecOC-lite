@@ -1,9 +1,17 @@
-//
-// Created by zhao chenyang on 2021/5/16.
-//
+#ifndef _PLATFORM_TYPES_H
+#define _PLATFORM_TYPES_H
 
-#ifndef SECOC_PLATFORM_TYPES_H
-#define SECOC_PLATFORM_TYPES_H
+
+/* Boolean Values */
+#ifndef FALSE
+#define FALSE       (0u)
+#endif
+#ifndef TRUE
+#define TRUE        (1u)
+#endif
+
+#define HIGH        (1u)
+#define LOW         (0u)
 
 /* Boolean Data Type */
 typedef unsigned char			boolean;
@@ -18,5 +26,4 @@ typedef unsigned long long    	uint64;         /*       0..18446744073709551615 
 typedef float                 	float32;
 typedef double                	float64;
 
-
-#endif //SECOC_PLATFORM_TYPES_H
+#endif
