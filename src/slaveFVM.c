@@ -101,7 +101,7 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
     }
 
     for (int i = 0; i < NUM_RESET; i++) {
-        resetCnt[i].resetdata = reset_flag;
+        resetCnt[i].resetdata = (uint8 *) (reset_flag);
     }
 
 
@@ -235,7 +235,7 @@ FVM_updatePreValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
     }
 
     // 根据新鲜值更新trip reset msg
-    preTrip[TxPduId] = trip_bits.M;
+    preTrip[TxPduId] = (uint8) trip_bits.M;
     resetCnt[TxPduId].preresetdata = reset_bits.M;
     msgCnt[TxPduId].premsgdata = msg_bits.M;
 }
@@ -367,8 +367,8 @@ FVM_GetTxFreshnessTruncData(
     ResetState_Type current_resetState = resetState[SecOCFreshnessValueID];
     MsgCntS_Type current_msg = msgCnt[SecOCFreshnessValueID];
 
-    uint8 length = TripCntLength + current_reset.ResetCntLength + SecOCTruncatedFreshnessValueLength - 2 + 2;
-    SecOCTruncatedFreshnessValueLength = &length;
+    uint8 length = TripCntLength + current_reset.ResetCntLength + *SecOCTruncatedFreshnessValueLength - 2 + 2;
+    SecOCTruncatedFreshnessValueLength = (uint32 *) &length;
     bitmap truncatedFreshness_bits = init_from_uint8(SecOCTruncatedFreshnessValue, length);
 
     // 获取trip
