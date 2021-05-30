@@ -1,36 +1,7 @@
 #include "slaveFVM.h"
 
-uint8 verifystate = 0; // verifystate确认状态 0表示未确认 1表示确认
-
-uint16 tripcanid = 0x2bd;    //可配置
-uint8 trip[3];               // trip报文
-uint8 TripCntLength = 16; //可配置
-uint16 ackid = 0x2be;        //返回的ack报文  可配置
-
-uint8 preTrip[3 * NUM_MSG];
-
-uint8 msgData[6 * NUM_MSG];
-uint8 preMsgData[6 * NUM_MSG];
-
-uint8 resetData[3 * NUM_RESET];
-uint8 preresetData[3 * NUM_MSG];
 
 uint8 *verifyPtr;
-
-ResetCntS_Type resetCnt[] = {
-        {
-                .resetdata = resetData,
-                .preresetdata = preresetData,
-                .ResetCntLength = 15,
-
-        },
-        {
-                .resetdata = resetData,
-                .preresetdata = preresetData,
-                .ResetCntLength = 17,
-                .resetcanid = 0x66}
-};
-
 /**
  * 更新trip报文
 */
@@ -103,11 +74,6 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
     return E_OK;
 }
 
-uint16 error_id = 0x100; //报错报文id   可配置
-
-uint8 resetData[3 * NUM_RESET];
-uint8 preresetData[3 * NUM_MSG];
-uint16 resetcanid[] = {0x65, 0x66};
 
 ResetState_Type resetState[] = {
         {
