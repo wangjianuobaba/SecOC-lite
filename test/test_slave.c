@@ -209,7 +209,5 @@ void updatePreValue_test(){
 
 int main(int argc, char const *argv[]) {
     getRxFreshness_test();
-    updatePreValue_test();
-    GetTxFreshness_test();
     return 0;
 }
