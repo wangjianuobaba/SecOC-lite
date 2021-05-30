@@ -15,6 +15,28 @@ uint16 tripcanid = 0x2bd; //可配置
 uint8 trip[3]; // trip报文
 uint8 TripCntLength = 16; //可配置
 uint16 ackid = 0x2be; //返回的ack报文  可配置
+
+/**
+ * 根据id匹配不同报文
+ * 1.ack确认报文表示 master收到自己的ack报文，修改标记在后续收到trip同步报文不返回ack报文
+ * 2.通知报文送达则secoc功能可执行。。
+ * 3.错误报文表面trip同步失败
+*/
+FUNC(void, SLAVE_CODE)
+FVM_changeState(VAR(PduInfoType, COMSTACK_TYPES_VAR) RxPduId) {
+    if (RxPduId == ackvid) // ack确认报文
+    {
+        verifystate = 1; // 状态验证
+    } else if (RxPduId == notifyid) // 通知报文
+    {
+        secocenabled = 1; // 不可工作
+    } else if (RxPduId == errorid) // 错误
+    {
+        // pass
+    }
+}
+
+
 /**
  * 更新trip报文
 */
@@ -309,7 +331,7 @@ FVM_GetTxFreshness(
  * 构造SecOCTruncatedFreshnessValue
 */
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
-FvM_GetTxFreshnessTruncData(
+FVM_GetTxFreshnessTruncData(
         VAR(uint16, FRESH_VAR) SecOCFreshnessValueID,
         P2VAR(uint8, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValue,
         P2VAR(uint32, SLAVE_CODE, SLAVE_APPL_DATA)SecOCFreshnessValueLength,
@@ -360,14 +382,7 @@ FvM_GetTxFreshnessTruncData(
 }
 
 
-// 构造新鲜值的标志
-enum SYMBOL {
-    F1_1 = 1, F1_2, F1_3,
-    F2_1, F2_2, F2_3,
-    F3_1, F3_2, F3_3,
-    F4_1, F4_2, F4_3,
-    F5_1, F5_2, F5_3,
-};
+
 
 /**
  * 构造新鲜值
