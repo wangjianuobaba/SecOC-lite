@@ -23,7 +23,7 @@ uint16 ackid = 0x2be; //返回的ack报文  可配置
  * 3.错误报文表面trip同步失败
 */
 FUNC(void, SLAVE_CODE)
-FVM_changeState(VAR(PduInfoType, COMSTACK_TYPES_VAR) RxPduId) {
+FVM_changeState(VAR(PduIdType, COMSTACK_TYPES_VAR) RxPduId) {
     if (RxPduId == ackvid) // ack确认报文
     {
         verifystate = 1; // 状态验证

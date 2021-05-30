@@ -2,11 +2,6 @@
 
 uint8 preTrip[3 * NUM_MSG];
 
-uint8 resetData[3 * NUM_RESET];
-uint8 preresetData[3 * NUM_MSG];
-uint8 msgData[6 * NUM_MSG];
-uint8 preMsgData[6 * NUM_MSG];
-
 
 ConfirmECU_Type confirmECU[] = {  //可配置的
         {

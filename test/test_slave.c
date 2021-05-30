@@ -1,5 +1,7 @@
 #include <assert.h>
 #include "slaveFVM.h"
+#include "slaveFVM_Cfg.h"
+#include "bitmap.h"
 
 void trip_test() {
     bitmap b = init(16);
@@ -17,7 +19,6 @@ void trip_test() {
     printf("%s", bit2string(trip_bits, 24));
 }
 
-void
 
 void getRxFreshness_test() {
     uint16 id = 0;

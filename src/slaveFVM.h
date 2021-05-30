@@ -14,8 +14,19 @@ enum SYMBOL {
     F5_1, F5_2, F5_3,
 };
 
+uint16 ackvid; // ecu返回的ack确认报文  可配置
+uint8 verifystate; // verifystate确认状态 0表示未确认 1表示确认
+uint16 notifyid; // ecu返回的通知报文  可配置
+uint8 secocenabled;     //secoc可工作  0表示不行 1表示可以
+uint8 errorid; // 出错
+
+uint16 tripcanid; //可配置
+uint8 trip[3]; // trip报文
+uint8 TripCntLength; //可配置
+uint16 ackid; //返回的ack报文  可配置
+
 FUNC(void, SLAVE_CODE)
-FVM_changeState(VAR(PduInfoType, COMSTACK_TYPES_VAR) RxPduId);
+FVM_changeState(VAR(PduIdType, COMSTACK_TYPES_VAR) RxPduId);
 
 
 FUNC(void, SLAVE_CODE)
