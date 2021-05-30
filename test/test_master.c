@@ -88,7 +88,9 @@ void testInit() {
 
 void testGetTripValue() {
     printf("GetTripValueTest:\n\t");
+    uint8 data[8];
     PduInfoType pduInfoPtr;
+    pduInfoPtr.SduDataPtr = data;
     TripCntLength = 11;
     trip[0] = 0x04;
     trip[1] = 0xff;

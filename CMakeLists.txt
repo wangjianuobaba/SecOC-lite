@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.4.1)
 
 project(secoc)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/master/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/master/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/utils)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test)
 
-set(INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/master/include)
 set(UTILS ${CMAKE_CURRENT_SOURCE_DIR}/utils)
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/master/src)
 
 
 ## master test
@@ -20,9 +20,9 @@ set(MASTER_INCLUDES
         ${INCLUDE}/sm4.h
         )
 set(MASTER_SOURCES
-        ${SOURCES}/masterFVM.c
-        ${SOURCES}/MacGenerate.c
-        ${SOURCES}/sm4.c
+        ${SOURCE}/masterFVM.c
+        ${SOURCE}/MacGenerate.c
+        ${SOURCE}/sm4.c
         )
 add_executable(MasterTest
         ${UTILS}
