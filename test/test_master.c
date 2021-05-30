@@ -6,13 +6,28 @@
 #include "masterFVM.h"
 
 void testInit() {
-    printf("InitTest:\n\t");
+    TripCntLength = 8;
+    printf("InitTest(TripCntLength = 8):\n\t");
+
+    trip[0] = 255;
+    MasterFVM_Init();
+    assert(trip[0] == 1);
+    printf("1/2\r\t");
+
+    trip[0] = 133;
+    MasterFVM_Init();
+    assert(trip[0] == 134);
+    printf("2/2\r\t");
+    printf("\n\ttest success!!\n");
+
+
+    TripCntLength = 16;
+    printf("\nInitTest(TripCntLength = 16):\n\t");
     trip[0] = 255;
     trip[1] = 255;
     MasterFVM_Init();
     assert(trip[0] == 0);
     assert(trip[1] == 1);
-    assert(TripCntLength == 1);
     printf("1/3\r\t");
 
     trip[1] = 255;
@@ -20,7 +35,6 @@ void testInit() {
     MasterFVM_Init();
     assert(trip[0] == 134);
     assert(trip[1] == 0);
-    assert(TripCntLength == 16);
     printf("2/3\r\t");
 
     trip[1] = 2;
@@ -28,10 +42,48 @@ void testInit() {
     MasterFVM_Init();
     assert(trip[0] == 3);
     assert(trip[1] == 3);
-    assert(TripCntLength == 10);
     printf("3/3\r\t");
-    printf("\n\tInit test success!!\n");
+    printf("\n\tsuccess!!\n");
 
+
+    TripCntLength = 24;
+    printf("\nInitTest(TripCntLength = 24):\n\t");
+    trip[0] = 255;
+    trip[1] = 255;
+    trip[2] = 255;
+    MasterFVM_Init();
+    assert(trip[0] == 0);
+    assert(trip[1] == 0);
+    assert(trip[2] == 1);
+    printf("1/4\r\t");
+
+    trip[0] = 133;
+    trip[1] = 133;
+    trip[2] = 255;
+    MasterFVM_Init();
+    assert(trip[0] == 133);
+    assert(trip[1] == 134);
+    assert(trip[2] == 0);
+    printf("2/4\r\t");
+
+    trip[0] = 133;
+    trip[1] = 255;
+    trip[2] = 255;
+    MasterFVM_Init();
+    assert(trip[0] == 134);
+    assert(trip[1] == 0);
+    assert(trip[2] == 0);
+    printf("2/4\r\t");
+
+    trip[0] = 255;
+    trip[1] = 255;
+    trip[2] = 133;
+    MasterFVM_Init();
+    assert(trip[0] == 255);
+    assert(trip[1] == 255);
+    assert(trip[2] == 134);
+    printf("4/4\r\t");
+    printf("\n\tsuccess!!\n\n");
 }
 
 void testGetTripValue() {
@@ -54,7 +106,7 @@ void testGetTripValue() {
     assert(pduInfoPtr.SduDataPtr[6] == 0x00);
     assert(pduInfoPtr.SduDataPtr[7] == 0x00);
     printf("1/1\r\t");
-    printf("\n\tgetTripValue test success!!\n");
+    printf("\n\tgetTripValue test success!!\n\n");
 }
 
 void testGetResetValue() {
@@ -96,7 +148,7 @@ void testGetResetValue() {
     assert(pduInfoPtr.SduDataPtr[6] == 0x80);
     assert(pduInfoPtr.SduDataPtr[7] == 0x00);
     printf("2/2\r\t");
-    printf("\n\tgetResetValue test success!!\n");
+    printf("\n\tgetResetValue test success!!\n\n");
 }
 
 int main() {

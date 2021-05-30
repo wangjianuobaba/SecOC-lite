@@ -24,20 +24,43 @@ MasterFVM_Init(void) {
      * 写入Trip
      */
     // HAL_I2C_Mem_Read(&hi2c1, ADDR_24LCxx_Read, 0, I2C_MEMADD_SIZE_8BIT, trip, 2, 0xff); //读取2字节的trip
-    if (trip[1] == 255) { //低位满，需进位
-        if (trip[0] == 255) { //trip值达到最大值
-            trip[0] = 0;
-            trip[1] = 1;
-            TripCntLength = 1;
-        } else { //trip未达最大值， 高位进位，低位到0
+    if (TripCntLength <= 8) {
+        if (trip[0] == 255) {
+            trip[0] = 1;
+        } else {
             trip[0] += 1;
-            trip[1] = 0;
-            TripCntLength = (uint8) 8 + length(trip[0]);
+        }
+    } else if (TripCntLength <= 16) {
+        if (trip[1] == 255) { //低位满，需进位
+            if (trip[0] == 255) { //trip值达到最大值
+                trip[0] = 0;
+                trip[1] = 1;
+            } else { //trip未达最大值， 高位进位，低位到0
+                trip[0] += 1;
+                trip[1] = 0;
+            }
+        } else {
+            trip[1] += 1;
         }
     } else {
-        trip[1] += 1;
-        TripCntLength = (uint8) 8 + length(trip[0]);
+        if (trip[2] == 255) {
+            if (trip[1] == 255) {
+                if (trip[0] == 255) {
+                    trip[0] = trip[1] = 0;
+                    trip[2] = 1;
+                } else {
+                    trip[1] = trip[2] = 0;
+                    trip[0] += 1;
+                }
+            } else {
+                trip[1] += 1;
+                trip[2] = 0;
+            }
+        } else {
+            trip[2] += 1;
+        }
     }
+
 
     /**
      * 写回Trip
@@ -168,12 +191,12 @@ MasterFVM_getResetValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
     if (TxPduId < NUM_RESET) {
         current_reset = resetCnt[TxPduId];
         // 配置resetData最多2个字节
-        uint16 resetData = ((uint16)current_reset.resetdata[0] << 8) + (uint16)current_reset.resetdata[1];
+        uint16 resetData = ((uint16) current_reset.resetdata[0] << 8) + (uint16) current_reset.resetdata[1];
         // resetData + 1
-        if(resetData < (1<<current_reset.ResetCntLength)-1)
+        if (resetData < (1 << current_reset.ResetCntLength) - 1)
             resetData++;
-        for(int i=0;i<2;++i){
-            current_reset.resetdata[i] = (uint8)(resetData>>(8*(1-i)));
+        for (int i = 0; i < 2; ++i) {
+            current_reset.resetdata[i] = (uint8) (resetData >> (8 * (1 - i)));
         }
         get_value(current_reset.resetcanid, PduInfoPtr, TripCntLength, current_reset.ResetCntLength);
     }
