@@ -1,6 +1,6 @@
-#include "MacGenerate.h"
+#include "../include/MacGenerate.h"
 
-#include "sm4.h"
+#include "../include/sm4.h"
 #include <string.h>
 #include <stdio.h>
 

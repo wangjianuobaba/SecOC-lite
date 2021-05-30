@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include "Csm.h"
-#include "MacGenerate.h"
+#include "../include/MacGenerate.h"
 
 uint8 tmpmac[16];
 

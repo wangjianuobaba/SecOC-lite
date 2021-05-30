@@ -1,7 +1,7 @@
 #include <bitmap.h>
-#include "slaveFVM.h"
+#include "../include/slaveFVM.h"
 #include "slaveFVM_Cfg.c"
-#include "MacGenerate.h"
+#include "../include/MacGenerate.h"
 
 
 uint8 *verifyPtr;

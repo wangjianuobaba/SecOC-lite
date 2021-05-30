@@ -35,10 +35,15 @@ set(SLAVE_INCLUDES
         ${INCLUDE}/slaveFVM.h
         ${INCLUDE}/Compiler.h
         ${UTILS}/bitmap.h
+        ${INCLUDE}/sm4.h
+        ${INCLUDE}/MacGenerate.h
         )
 set(SLAVE_SOURCES
         ${SOURCES}/slaveFVM.c
-        ${UTILS}/bitmap.c)
+        ${UTILS}/bitmap.c
+        ${SOURCES}/sm4.c
+        ${SOURCES}/MacGenerate.c
+        )
 add_executable(SlaveTest
         ${TEST_SLAVE}
         ${SLAVE_INCLUDES}

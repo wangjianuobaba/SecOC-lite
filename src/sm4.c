@@ -52,7 +52,7 @@
  // key:    01 23 45 67 89 ab cd ef fe dc ba 98 76 54 32 10
  // cypher: 59 52 98 c7 c6 fd 27 1f 04 02 f8 04 c3 3d 3f 66
 
-#include "sm4.h"
+#include "../include/sm4.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -279,7 +279,7 @@ void sm4_setkey_enc( unsigned long sk[32], unsigned char key[16])
 /*
  * SM4-ECB block encryption/decryption
  */
-/*ÐÂ°æÔÚÏÂÃæ
+/*ï¿½Â°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void sm4_crypt_ecb(sm4_context* ctx,
     int mode,
     int length,
@@ -297,7 +297,7 @@ void sm4_crypt_ecb(sm4_context* ctx,
 }
 */
 
-//È¥µôint mode ËüÊÇÎ´ÓÃ²ÎÊý
+//È¥ï¿½ï¿½int mode ï¿½ï¿½ï¿½ï¿½Î´ï¿½Ã²ï¿½ï¿½ï¿½
 void sm4_crypt_ecb( unsigned long sk[32],
     unsigned char length,
     unsigned char* input,
