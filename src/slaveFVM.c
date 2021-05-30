@@ -93,11 +93,24 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
 
     // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
     //     return E_NOT_OK;
+
+    uint8 hash[8];
+    Mac_Generate((uint8 *) dataptr_bits.M, dataptr_bits.N, hash);
+    if (*(uint64 *) hash != *(uint64 *) mac) {
+        return E_NOT_OK;
+    }
+
+    for (int i = 0; i < NUM_RESET; i++) {
+        resetCnt[i].resetdata = reset_flag;
+    }
+
+
     memset(trip, 0, sizeof(trip));
     for (int i = 0; i < TripCntLength; i++) {
         if (test(verifyPtr_bits, i))
             set(trip_bits, i);
     }
+
     reset_flag = false;
     if (test(verifyPtr_bits, TripCntLength)) {
         reset_flag = true;
@@ -169,7 +182,7 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
 
     uint8 hash[8];
     Mac_Generate((uint8 *) dataptr_bits.M, dataptr_bits.N, hash);
-    if (*(uint64 *) hash !=*(uint64 *)mac) {
+    if (*(uint64 *) hash != *(uint64 *) mac) {
         return E_NOT_OK;
     }
 
