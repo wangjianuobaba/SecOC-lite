@@ -1,7 +1,20 @@
+#include <bitmap.h>
 #include "slaveFVM.h"
+#include "slaveFVM_Cfg.c"
 
 
 uint8 *verifyPtr;
+
+uint16 ackvid = 0x322; // ecu返回的ack确认报文  可配置
+uint8 verifystate = 0; // verifystate确认状态 0表示未确认 1表示确认
+uint16 notifyid = 0x386; // ecu返回的通知报文  可配置
+uint8 secocenabled = 0;     //secoc可工作  0表示不行 1表示可以
+uint8 errorid = 0x64; // 出错
+
+uint16 tripcanid = 0x2bd; //可配置
+uint8 trip[3]; // trip报文
+uint8 TripCntLength = 16; //可配置
+uint16 ackid = 0x2be; //返回的ack报文  可配置
 /**
  * 更新trip报文
 */
@@ -75,21 +88,6 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
 }
 
 
-ResetState_Type resetState[] = {
-        {
-                .resetflag = 0,
-                .resetloss = 0,
-                .resetTag = 0,
-                .resetTime = 1000
-        },
-        {
-                .resetflag = 0,
-                .resetloss = 0,
-                .resetTag = 0,
-                .resetTime = 2500
-        }
-};
-
 /**
  * 更新reset报文 
 */
@@ -162,17 +160,7 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
     return E_OK;
 }
 
-MsgCntS_Type msgCnt[] = {
-        {
-                .msgdata = msgData,
-                .premsgdata = preMsgData,
-                .MsgCntLength = 16},
-        {
-                .msgdata = msgData,
-                .premsgdata = preMsgData,
-                .MsgCntLength = 26
-        }
-};
+
 
 /**
  * 更新pretrip prereset premsg
