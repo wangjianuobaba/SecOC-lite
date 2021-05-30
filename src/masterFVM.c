@@ -78,8 +78,6 @@ ResetCnt_Type currentReset;
 
 void get_value(uint16 canId, PduInfoType *PduInfoPtr, uint8 TripCntLength, uint8 ResetCntLength) {
 
-    uint8 result[8];
-
     // 根据CntLength获得byte length
     uint8 tripByteLength = (TripCntLength + 7) / 8;
     uint8 resetByteLength = (ResetCntLength + 7) / 8;
@@ -160,9 +158,8 @@ void get_value(uint16 canId, PduInfoType *PduInfoPtr, uint8 TripCntLength, uint8
         macValue += ((uint64) resetDataValue << 32);
     }
     for (int i = 0; i < 8; ++i) {
-        result[i] = (uint8) (macValue >> (8 * (7 - i)));
+        PduInfoPtr->SduDataPtr[i] = (uint8) (macValue >> (8 * (7 - i)));
     }
-    PduInfoPtr->SduDataPtr = result;
 }
 
 
