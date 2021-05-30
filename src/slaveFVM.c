@@ -1,6 +1,7 @@
 #include <bitmap.h>
 #include "slaveFVM.h"
 #include "slaveFVM_Cfg.c"
+#include "MacGenerate.h"
 
 
 uint8 *verifyPtr;
@@ -160,20 +161,30 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
             set(dataptr_bits, i + 16 + TripCntLength);
     }
 
-    // Csm验证
+    // 验证
     bitmap verifyPtr_bits = init(TripCntLength + 1);
     verifyPtr = (uint8 *) verifyPtr_bits.M;
     // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
     //     return E_NOT_OK;
-    memset(trip, 0, sizeof(trip));
-    for (int i = 0; i < TripCntLength; i++) {
-        if (test(verifyPtr_bits, i))
-            set(trip_bits, i);
+
+    uint8 hash[8];
+    Mac_Generate((uint8 *) dataptr_bits.M, dataptr_bits.N, hash);
+    if (*(uint64 *) hash !=*(uint64 *)mac) {
+        return E_NOT_OK;
     }
-    resetState[TxPduId].resetflag = false;
-    if (test(verifyPtr_bits, TripCntLength)) {
-        resetState[TxPduId].resetflag = true;
-    }
+
+    //TODO: 编译器没警告，但我不确定行不行，不行就换memcopy
+    *(resetCnt[TxPduId].resetdata) = *reset_bits.M;
+
+//    memset(trip, 0, sizeof(trip));
+//    for (int i = 0; i < TripCntLength; i++) {
+//        if (test(verifyPtr_bits, i))
+//            set(trip_bits, i);
+//    }
+//    resetState[TxPduId].resetflag = false;
+//    if (test(verifyPtr_bits, TripCntLength)) {
+//        resetState[TxPduId].resetflag = true;
+//    }
     //(*PduInfoPtr).SduDataPtr = NULL;
     //(*PduInfoPtr).SduLength = 8;
 
