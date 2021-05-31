@@ -2,27 +2,19 @@
 // Created by zhao chenyang on 2021/5/16.
 //
 
-#ifndef SECOC_MASTERFVM_H
-#define SECOC_MASTERFVM_H
+#ifndef _SECOC_MASTERFVM_H
+#define _SECOC_MASTERFVM_H
 
+#include "MasterFVM_Cfg.h"
 #include "Compiler.h"
 #include "tools.h"
 #include "bitmap.h"
+#include "MacGenerate.h"
+#include <string.h>
 
-extern uint8 trip[3];
-extern uint8 TripCntLength;
 
-// masterFVM_Types.h
-typedef struct
-{
-    uint8 *resetdata;
-    uint8 ResetCntLength;
-    uint16 resetcanid;
-    uint32 resetSyntag;
-    uint32 resetSynTime;
-} ResetCnt_Type;
-
-ResetCnt_Type resetCnt[2];
+uint8 TripCntLength; //可配置
+uint8 trip[3];
 
 // void MasterFVM_Init(void);
 FUNC(void, MASTER_CODE)
