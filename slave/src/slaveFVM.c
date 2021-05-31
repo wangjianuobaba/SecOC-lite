@@ -50,11 +50,14 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
     uint8 *receiveData = PduInfoPtr->SduDataPtr; //64bit
     uint64 receiveDataValue = 0;
     for (int i = 0; i < 8; ++i) {
-        receiveDataValue += (uint64) receiveData[i] << (8 * (7 - i));
+        receiveDataValue |= (uint64) receiveData[i] << (8 * (7 - i));
     }
+
+    // mac
     uint64 receiveMacValue = receiveDataValue << (TripCntLength + 1);
     receiveMacValue >>= (TripCntLength + 1);
     uint64 receiveTripResetValue = receiveDataValue - receiveMacValue;
+
 
     uint64 macGenerateDataValue = 0;
     macGenerateDataValue += (uint64) tripcanid << 48;
@@ -90,61 +93,42 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
     if (NUM_RESET <= TxPduId) return E_NOT_OK;
 
     // reset长度
-    uint8 ResetCntLengthgth = resetCnt[TxPduId].ResetCntLength;
+    uint8 ResetCntLength = resetCnt[TxPduId].ResetCntLength;
 
     // 获取reset报文
-    uint8 *data = PduInfoType->SduDataPtr; //64bit
-    bitmap reset_message = init_from_uint8(data, 64);
-
-    // 解析reset报文
-    // reset报文的reset部分 长度为ResetCntLengthgth
-    bitmap reset_bits = init(sizeof(uint8) * 3);
-    for (int i = 0; i < ResetCntLengthgth; i++) {
-        if (test(reset_message, i))
-            set(reset_bits, i);
-    }
-    // reset报文的mac部分 长度为(64-ResetLengthgth)bit
-    uint8 macLength = 64 - ResetCntLengthgth;
-    bitmap mac_bits = init(macLength);
-    uint8 *mac = (uint8 *) mac_bits.M;
-    for (int i = ResetCntLengthgth; i < 64; i++) {
-        if (test(reset_message, i))
-            set(mac_bits, i);
+    uint64 receiveDataValue = 0;
+    for (int i = 0; i < 8; ++i) {
+        receiveDataValue |= (uint64) receiveData[i] << (8 * (7 - i));
     }
 
-    // 构造dataptr 长度为128bit
-    bitmap dataptr_bits = init(sizeof(char) * 8);
-    char *dataptr = dataptr_bits.M;
-    // resetcanid
-    for (int i = 0; i < 16; i++) {
-        if (resetcanid[TxPduId] & (1 << (16 - i - 1)))
-            set(dataptr_bits, i);
-    }
-    // trip
-    bitmap trip_bits = init_from_uint8(trip, sizeof(uint8) * 3);
-    for (int i = 0; i < TripCntLength; i++)
-        if (test(trip_bits, i))
-            set(dataptr_bits, i + 16);
-    // reset
-    for (int i = 0; i < ResetCntLengthgth; i++) {
-        if (test(reset_bits, i))
-            set(dataptr_bits, i + 16 + TripCntLength);
-    }
+    // mac
+    uint64 receiveMacValue = receiveDataValue << ResetCntLength;
+    receiveMacValue >>= ResetCntLength;
+    uint64 receiveResetValue = receiveDataValue - receiveMacValue;
 
-    // 验证
-    bitmap verifyPtr_bits = init(TripCntLength + 1);
-    verifyPtr = (uint8 *) verifyPtr_bits.M;
-    // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
-    //     return E_NOT_OK;
+    uint64 macGenerateDataValue = 0;
+    macGenerateDataValue |= (uint64) resetCnt[TxPduId].resetcanid << 48;\
+
+    if(TripCntLength<=8) {
+        macGenerateDataValue |= ((uint64)trip[0]<<(8-TripCntLength))>>16;
+    } else if(8<TripCntLength&&TripCntLength<=16) {
+        macGenerateDataValue |= ((uint64)trip[0]<<(16-TripCntLength))>>16;
+        macGenerateDataValue |= (uint64)trip[1]>>(24-(16-TripCntLength));
+    } else if(16<TripCntLength&&TripCntLength<=24) {
+        macGenerateDataValue |= ((uint64)trip[0]<<(24-TripCntLength))>>16;
+        macGenerateDataValue |= (uint64)trip[1]>>(24-(16-TripCntLength));
+        macGenerateDataValue |= (uint64)trip[2]>>(32-(16-TripCntLength));
+    }
+    macGenerateDataValue |=  (receiveResetValue >> (16+TripCntLength));
 
     uint8 hash[8];
-    Mac_Generate((uint8 *) dataptr_bits.M, dataptr_bits.N, hash);
+    Mac_Generate((uint8 *) macGenerateDataValue, 8, hash);
     if (*(uint64 *) hash != *(uint64 *) mac) {
         return E_NOT_OK;
     }
 
     //TODO: 编译器没警告，但我不确定行不行，不行就换memcopy
-    *(resetCnt[TxPduId].resetdata) = *reset_bits.M;
+    *(resetCnt[TxPduId].resetdata) = receiveResetValue;
 
 //    memset(trip, 0, sizeof(trip));
 //    for (int i = 0; i < TripCntLength; i++) {
