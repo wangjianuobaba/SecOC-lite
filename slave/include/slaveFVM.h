@@ -3,7 +3,7 @@
 
 #include "slaveFVM_Cfg.h"
 #include "Compiler.h"
-#include "Compiler_Cfg.h"
+#include "../../include/Compiler_Cfg.h"
 
 // 构造新鲜值的标志
 enum SYMBOL {

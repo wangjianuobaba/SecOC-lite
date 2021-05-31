@@ -6,10 +6,10 @@
 #define _SECOC_MASTERFVM_H
 
 #include "MasterFVM_Cfg.h"
-#include "Compiler.h"
+#include "../../include/Compiler.h"
 #include "tools.h"
 #include "bitmap.h"
-#include "MacGenerate.h"
+#include "../../include/MacGenerate.h"
 #include <string.h>
 
 

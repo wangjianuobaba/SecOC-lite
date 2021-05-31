@@ -1,4 +1,4 @@
-#include "slaveFVM_Cfg.h"
+#include "../include/slaveFVM_Cfg.h"
 
 uint8 preTrip[3 * NUM_MSG];
 
