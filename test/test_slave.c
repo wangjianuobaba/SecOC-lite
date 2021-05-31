@@ -207,7 +207,16 @@ void updatePreValue_test(){
     return;
 }
 
+void testTrip(){
+    printf("TripTest:\n\t");
+    uint8 data[8] = {159,247,45,159,143,1,95,227};
+    PduInfoType pduInfoPtr;
+    pduInfoPtr.SduDataPtr = data;
+    uint8 result = FVM_updateTrip(&pduInfoPtr);
+    assert(result == E_OK);
+}
+
 int main(int argc, char const *argv[]) {
-    getRxFreshness_test();
+    testTrip();
     return 0;
 }

@@ -12,9 +12,9 @@ uint16 notifyid = 0x386; // ecu返回的通知报文  可配置
 uint8 secocenabled = 0;     //secoc可工作  0表示不行 1表示可以
 uint8 errorid = 0x64; // 出错
 
-uint16 tripcanid = 0x2bd; //可配置
+uint16 tripcanid = 0xffff; //可配置
 uint8 trip[3]; // trip报文
-uint8 TripCntLength = 16; //可配置
+uint8 TripCntLength = 11; //可配置
 uint16 ackid = 0x2be; //返回的ack报文  可配置
 
 /**
@@ -47,78 +47,35 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
     if (verifystate == 1) return E_OK;
 
     // 获取trip报文
-    uint8 *data = PduInfoPtr->SduDataPtr; //64bit
-    bitmap trip_message = init_from_uint8(data, 64);
-
-    // 解析trip报文
-    // trip报文的trip部分 长度为TripCntLengthgth
-    memset(trip, 0, sizeof(uint8) * 3);
-    bitmap trip_bits = init_from_uint8(trip, sizeof(trip) * 8);
-    for (int i = 0; i < TripCntLength; i++) {
-        if (test(trip_message, i))
-            set(trip_bits, i);
+    uint8 *receiveData = PduInfoPtr->SduDataPtr; //64bit
+    uint64 receiveDataValue = 0;
+    for (int i = 0; i < 8; ++i) {
+        receiveDataValue += (uint64) receiveData[i] << (8 * (7 - i));
     }
-    // trip报文的reset部分 长度为1bit
-    bool reset_flag = false;
-    if (test(trip_message, TripCntLength))
-        reset_flag = true;
-    // trip报文的mac部分 长度为(64-TripLengthgth-1)bit
-    uint8 macLength = 64 - TripCntLength - 1;
-    bitmap mac_bits = init(macLength);
-    uint8 *mac = (uint8 *) mac_bits.M;
-    for (int i = TripCntLength + 1; i < 64; i++) {
-        if (test(trip_message, i))
-            set(mac_bits, i);
+    uint64 receiveMacValue = receiveDataValue << (TripCntLength + 1);
+    receiveMacValue >>= (TripCntLength + 1);
+    uint64 receiveTripResetValue = receiveDataValue - receiveMacValue;
+
+    uint64 macGenerateDataValue = 0;
+    macGenerateDataValue += (uint64) tripcanid << 48;
+    macGenerateDataValue += receiveTripResetValue >> 16;
+
+    uint8 macGenerateData[8];
+    memset(macGenerateData, 0, sizeof(macGenerateData));
+    for (int i = 0; i < 8; ++i) {
+        macGenerateData[i] = (uint8) (macGenerateDataValue >> ((7 - i) * 8));
     }
-
-    // 构造dataptr 长度为128bit
-    bitmap dataptr_bits = init(sizeof(char) * 8);
-    char *dataptr = dataptr_bits.M;
-    // tripcanid
-    for (int i = 0; i < 16; i++) {
-        if (tripcanid & (1 << (16 - i - 1)))
-            set(dataptr_bits, i);
-    }
-    // reset
-    if (reset_flag)
-        set(dataptr_bits, 16);
-    // trip
-    for (int i = 0; i < TripCntLength; i++)
-        if (test(trip_bits, i))
-            set(dataptr_bits, i + 17);
-
-    // Csm验证
-    bitmap verifyPtr_bits = init(TripCntLength + 1);
-    verifyPtr = (uint8 *) verifyPtr_bits.M;
-
-    // if (Csm_MacVerify(jobId, mode, dataptr, 32, mac, macLength, verifyPtr) == E_NOT_OK)
-    //     return E_NOT_OK;
-
     uint8 hash[8];
-    Mac_Generate((uint8 *) dataptr_bits.M, dataptr_bits.N, hash);
-    if (*(uint64 *) hash != *(uint64 *) mac) {
+    memset(hash, 0, sizeof(hash));
+    uint64 hashValue = 0;
+    Mac_Generate(macGenerateData, 8, hash);
+
+    for (int i = 0; i < 8; ++i) {
+        hashValue += (uint64) hash[i] << (8 * (7 - i));
+    }
+    hashValue >>= (TripCntLength + 1);
+    if (hashValue != receiveMacValue)
         return E_NOT_OK;
-    }
-
-    for (int i = 0; i < NUM_RESET; i++) {
-        resetCnt[i].resetdata = (uint8 *) (reset_flag);
-    }
-
-
-    memset(trip, 0, sizeof(trip));
-    for (int i = 0; i < TripCntLength; i++) {
-        if (test(verifyPtr_bits, i))
-            set(trip_bits, i);
-    }
-
-    reset_flag = false;
-    if (test(verifyPtr_bits, TripCntLength)) {
-        reset_flag = true;
-    }
-    //(*PduInfoPtr).SduDataPtr = NULL;
-    //(*PduInfoPtr).SduLength = 8;
-
-    // CanIf_Transmit(ackid, PduInfoPtr);
 
     return E_OK;
 }

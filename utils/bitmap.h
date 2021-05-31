@@ -17,7 +17,7 @@ typedef struct Bitmap {
 bitmap init(int n);
 bitmap init_from_uint8(const uint8 *data, int n);
 // 扩充
-void expand(bitmap b, int k);
+void expand(bitmap* b, int k);
 
 // 回收
 void destroy(bitmap b);

@@ -1,7 +1,7 @@
 #ifndef _MASTERFVM_TYPES_H_
 #define _MASTERFVM_TYPES_H_
 
-#include "../../include/ComStack_Types.h"
+#include "ComStack_Types.h"
 
 typedef struct {
     uint8 state;
