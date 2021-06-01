@@ -89,12 +89,12 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
 */
 FUNC(VAR(Std_ReturnType, STD_TYPES_VAR), SLAVE_CODE)
 FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
-                P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoType) {
+                P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
     if (NUM_RESET <= TxPduId) return E_NOT_OK;
 
     // reset长度
     uint8 ResetCntLength = resetCnt[TxPduId].ResetCntLength;
-
+    uint8 *receiveData = PduInfoPtr->SduDataPtr; //64bit
     // 获取reset报文
     uint64 receiveDataValue = 0;
     for (int i = 0; i < 8; ++i) {
@@ -123,26 +123,13 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
 
     uint8 hash[8];
     Mac_Generate((uint8 *) macGenerateDataValue, 8, hash);
-    if (*(uint64 *) hash != *(uint64 *) mac) {
+    if (*(uint64 *) hash != *(uint64 *) receiveMacValue) {
         return E_NOT_OK;
     }
 
     //TODO: 编译器没警告，但我不确定行不行，不行就换memcopy
     *(resetCnt[TxPduId].resetdata) = receiveResetValue;
 
-//    memset(trip, 0, sizeof(trip));
-//    for (int i = 0; i < TripCntLength; i++) {
-//        if (test(verifyPtr_bits, i))
-//            set(trip_bits, i);
-//    }
-//    resetState[TxPduId].resetflag = false;
-//    if (test(verifyPtr_bits, TripCntLength)) {
-//        resetState[TxPduId].resetflag = true;
-//    }
-    //(*PduInfoPtr).SduDataPtr = NULL;
-    //(*PduInfoPtr).SduLength = 8;
-
-    // CanIf_Transmit(ackid, PduInfoPtr);
 
     return E_OK;
 }
