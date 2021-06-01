@@ -20,14 +20,14 @@ ResetCnt_Type resetCnt[]={
         .resetdata = resetData,
 	    .ResetCntLength = 11,
         .resetcanid = 0xffff,
-        .resettag = 0,
+        .resetSyntag = 0,
 	    .resetSynTime = 1000
     },
     {
         .resetdata = resetData,
 	    .ResetCntLength = 11,
         .resetcanid = 0xffff,
-        .resettag = 0,
+        .resetSyntag = 0,
 	    .resetSynTime = 2500
     }
 };

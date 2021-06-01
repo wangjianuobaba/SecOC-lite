@@ -33,36 +33,38 @@ set(UTILS_SOURCES
         ${UTILS}/tools.c
         )
 ## master test
-set(TEST_MASTER ${CMAKE_CURRENT_SOURCE_DIR}/test/test_master.c)
-set(MASTER_INCLUDES
-        ${MASTER_INCLUDE}/masterFVM.h
-        )
-set(MASTER_SOURCES
-        ${MASTER_SOURCE}/masterFVM.c
-        )
-add_executable(MasterTest
-        ${TEST_MASTER}
-        ${UTILS_INCLUDES}
-        ${UTILS_SOURCES}
-        ${INCLUDES}
-        ${SOURCES}
-        ${MASTER_INCLUDES}
-        ${MASTER_SOURCES})
-
-## slave test
-#set(TEST_SLAVE ${CMAKE_CURRENT_SOURCE_DIR}/test/test_slave.c)
-#set(SLAVE_INCLUDES
-#        ${SLAVE_INCLUDE}/slaveFVM.h
+#set(TEST_MASTER ${CMAKE_CURRENT_SOURCE_DIR}/test/test_master.c)
+#set(MASTER_INCLUDES
+#        ${MASTER_INCLUDE}/masterFVM.h
 #        )
-#set(SLAVE_SOURCES
-#        ${SLAVE_SOURCE}/slaveFVM.c
+#set(MASTER_SOURCES
+#        ${MASTER_SOURCE}/masterFVM.c
+#        ${MASTER_SOURCE}/masterFVM_Cfg.c
 #        )
-#add_executable(SlaveTest
-#        ${TEST_SLAVE}
+#add_executable(MasterTest
+#        ${TEST_MASTER}
 #        ${UTILS_INCLUDES}
 #        ${UTILS_SOURCES}
 #        ${INCLUDES}
 #        ${SOURCES}
-#        ${SLAVE_INCLUDES}
-#        ${SLAVE_SOURCES})
+#        ${MASTER_INCLUDES}
+#        ${MASTER_SOURCES})
+
+## slave test
+set(TEST_SLAVE ${CMAKE_CURRENT_SOURCE_DIR}/test/test_slave.c)
+set(SLAVE_INCLUDES
+        ${SLAVE_INCLUDE}/slaveFVM.h
+        ${SLAVE_INCLUDE}/slaveFVM_Cfg.h
+        )
+set(SLAVE_SOURCES
+        ${SLAVE_SOURCE}/slaveFVM.c
+        )
+add_executable(SlaveTest
+        ${TEST_SLAVE}
+        ${UTILS_INCLUDES}
+        ${UTILS_SOURCES}
+        ${INCLUDES}
+        ${SOURCES}
+        ${SLAVE_INCLUDES}
+        ${SLAVE_SOURCES})
 

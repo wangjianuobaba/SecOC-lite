@@ -86,77 +86,138 @@ void testInit() {
     printf("\n\tsuccess!!\n\n");
 }
 
+uint8 data[8];
+
 void testGetTripValue() {
     printf("GetTripValueTest:\n");
-    uint8 data[8];
     PduInfoType pduInfoPtr;
     pduInfoPtr.SduDataPtr = data;
-    TripCntLength = 11;
-    trip[0] = 0x04;
-    trip[1] = 0xff;
+
+    printf("1:\n");
+    TripCntLength = 5;
+    trip[0] = 0x01;
+    tripCanId = 0x2bd;
     MasterFVM_getTripValue(&pduInfoPtr);
-    // mac的构造采用直接复制的方式
-    // mac = dataptr = 0xffff(trip_can_id) + 1001 1111 111(trip) + 1(reset) +  0000
-    // SduData: 1001 1111 1111 + mac
-//    assert(pduInfoPtr.SduDataPtr[0] == 0x9f);
-//    assert(pduInfoPtr.SduDataPtr[1] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[2] == 0xff);
-//    // mac
-//    assert(pduInfoPtr.SduDataPtr[3] == 0xf9);
-//    assert(pduInfoPtr.SduDataPtr[4] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[5] == 0x00);
-//    assert(pduInfoPtr.SduDataPtr[6] == 0x00);
-//    assert(pduInfoPtr.SduDataPtr[7] == 0x00);
     for (int i = 0; i < 8; ++i) {
-        printf("%x",pduInfoPtr.SduDataPtr[i]);
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
     }
+    printf("\n");
+
+    printf("2:\n");
+    TripCntLength = 9;
+    trip[0] = 0x01;
+    trip[1] = 0xa5;
+    tripCanId = 0x2bd;
+    MasterFVM_getTripValue(&pduInfoPtr);
+    for (int i = 0; i < 8; ++i) {
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
+    }
+    printf("\n");
+
+    printf("3:\n");
+    TripCntLength = 16;
+    trip[0] = 0xff;
+    trip[1] = 0xdd;
+    tripCanId = 0x2bd;
+    MasterFVM_getTripValue(&pduInfoPtr);
+    for (int i = 0; i < 8; ++i) {
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
+    }
+    printf("\n");
+
+    printf("4:\n");
+    TripCntLength = 20;
+    trip[0] = 0x00;
+    trip[1] = 0x12;
+    trip[2] = 0x34;
+    tripCanId = 0x2bd;
+    MasterFVM_getTripValue(&pduInfoPtr);
+    for (int i = 0; i < 8; ++i) {
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
+    }
+    printf("\n");
+
 }
-//
-//void testGetResetValue() {
-//    printf("GetResetValueTest:\n\t");
-//    PduInfoType pduInfoPtr;
-//    TripCntLength = 11;
-//    trip[0] = 0x04;
-//    trip[1] = 0xff;
-//    resetCnt[1].resetcanid = 0xffff;
-//    resetCnt[1].ResetCntLength = 11;
-//    uint8 resetData[2];
-//    resetCnt[1].resetdata = resetData;
-//
-//    resetCnt[1].resetdata[0] = 0x04;
-//    resetCnt[1].resetdata[1] = 254;
-//    MasterFVM_getResetValue(1, &pduInfoPtr);
-//    // mac的构造采用直接复制的方式
-//    // mac = dataptr = 0xffff(reset_can_id) + 10011111 111(trip)10011 111111(reset)00
-//    // SduData: 10011111 111 + mac
-//    assert(pduInfoPtr.SduDataPtr[0] == 0x9f);
-//    assert(pduInfoPtr.SduDataPtr[1] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[2] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[3] == 0xf3);
-//    assert(pduInfoPtr.SduDataPtr[4] == 0xfe);
-//    assert(pduInfoPtr.SduDataPtr[5] == 0x7f);
-//    assert(pduInfoPtr.SduDataPtr[6] == 0x80);
-//    assert(pduInfoPtr.SduDataPtr[7] == 0x00);
-//    printf("1/2\r\t");
-//
-//    resetCnt[1].resetdata[0] = 0x07;
-//    resetCnt[1].resetdata[1] = 0xff;
-//    MasterFVM_getResetValue(1, &pduInfoPtr);
-//    assert(pduInfoPtr.SduDataPtr[0] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[1] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[2] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[3] == 0xf3);
-//    assert(pduInfoPtr.SduDataPtr[4] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[5] == 0xff);
-//    assert(pduInfoPtr.SduDataPtr[6] == 0x80);
-//    assert(pduInfoPtr.SduDataPtr[7] == 0x00);
-//    printf("2/2\r\t");
-//    printf("\n\tgetResetValue test success!!\n\n");
-//}
+
+void testGetResetValue() {
+    printf("GetResetValueTest:\n");
+
+    PduInfoType pduInfoPtr;
+    pduInfoPtr.SduDataPtr = data;
+
+    printf("1:\n");
+    TripCntLength = 5;
+    resetCnt[1].ResetCntLength = 19;
+
+    trip[0] = 0x01;
+
+    resetCnt[1].resetdata[0] = 0x07;
+    resetCnt[1].resetdata[1] = 0x00;
+    resetCnt[1].resetdata[2] = 0x19;
+
+    resetCnt[1].resetcanid = 0x0065;
+
+    MasterFVM_getResetValue(1, &pduInfoPtr);
+    for (int i = 0; i < 8; ++i) {
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
+    }
+
+    printf("\n2:\n");
+    TripCntLength = 9;
+    resetCnt[1].ResetCntLength = 8;
+
+    trip[0] = 0x01;
+    trip[0] = 0xa5;
+
+    resetCnt[1].resetdata[0] = 0xa1;
+
+    resetCnt[1].resetcanid = 0x0065;
+
+    MasterFVM_getResetValue(1, &pduInfoPtr);
+    for (int i = 0; i < 8; ++i) {
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
+    }
+
+    printf("\n3:\n");
+    TripCntLength = 16;
+    resetCnt[1].ResetCntLength = 10;
+
+    trip[0] = 0xff;
+    trip[0] = 0xdd;
+
+    resetCnt[1].resetdata[0] = 0x00;
+    resetCnt[1].resetdata[1] = 0xcb;
+
+    resetCnt[1].resetcanid = 0x0066;
+
+    MasterFVM_getResetValue(1, &pduInfoPtr);
+    for (int i = 0; i < 8; ++i) {
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
+    }
+
+    printf("\n4:\n");
+    TripCntLength = 20;
+    resetCnt[1].ResetCntLength = 7;
+
+    trip[0] = 0x00;
+    trip[0] = 0x12;
+    trip[0] = 0x34;
+
+    resetCnt[1].resetdata[0] = 0x01;
+
+    resetCnt[1].resetcanid = 0x0066;
+
+    MasterFVM_getResetValue(1, &pduInfoPtr);
+    for (int i = 0; i < 8; ++i) {
+        printf("0x%x,", pduInfoPtr.SduDataPtr[i]);
+    }
+    printf("\n");
+
+}
 
 int main() {
-//    testInit();
+    testInit();
     testGetTripValue();
-//    testGetResetValue();
+    testGetResetValue();
 }
 

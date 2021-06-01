@@ -6,8 +6,7 @@
 #define NUM_RESET 2
 #define NUM_ECU 2
 
-uint8 resetData[3*NUM_RESET];
-
+uint8 resetData[3 * NUM_RESET];
 
 ConfirmECU_Type confirmECU[NUM_RESET];
 

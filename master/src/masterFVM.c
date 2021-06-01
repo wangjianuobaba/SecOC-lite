@@ -8,6 +8,8 @@ uint8 TripCntLength = 16; //可配置
 uint8 trip[3];              //初始化时从非易失性存储器中获得并+1后再存回非易失性存储器， 低位先占满8字节 高位再占
 //例如  TripCntLength=11  且trip=0x04 0xff       [0000 0100][1111 1111][]
 // 返回一个uint8的实际位数
+uint16 tripCanId = 0xffff;           //可配置
+ResetCnt_Type currentReset;
 
 FUNC(void, MASTER_CODE)
 MasterFVM_Init(void) {
@@ -72,9 +74,6 @@ MasterFVM_Init(void) {
     // 	HAL_Delay(5);																			  //此处延时必加，与AT24C02写时序有关
     // }
 }
-
-uint16 tripCanId = 0xffff;           //可配置
-ResetCnt_Type currentReset;
 
 void get_value(uint16 canId, PduInfoType *PduInfoPtr, uint8 TripCntLength, uint8 ResetCntLength) {
 
@@ -187,8 +186,9 @@ MasterFVM_getResetValue(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
         }
         // resetData + 1
         // 看是否达到最大值
-        if ((uint64) resetDataValue < ((uint64) 1 << currentReset.ResetCntLength) - 1)
+        if ((uint64) resetDataValue < ((uint64) 1 << currentReset.ResetCntLength) - 1) {
             resetDataValue++;
+        }
         int byteLength = (ResetCntLength + 7) / 8;
         for (int i = 0; i < byteLength; ++i) {
             currentReset.resetdata[i] = (uint8) (resetDataValue >> (8 * (byteLength - i - 1)));

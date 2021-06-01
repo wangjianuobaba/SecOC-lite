@@ -1,6 +1,5 @@
 #include "../include/slaveFVM_Cfg.h"
 
-uint8 preTrip[3 * NUM_MSG];
 
 
 ConfirmECU_Type confirmECU[] = {  //可配置的

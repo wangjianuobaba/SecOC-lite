@@ -15,6 +15,7 @@
 
 uint8 TripCntLength; //可配置
 uint8 trip[3];
+uint16 tripCanId;
 
 // void MasterFVM_Init(void);
 FUNC(void, MASTER_CODE)
