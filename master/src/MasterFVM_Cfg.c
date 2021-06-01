@@ -1,8 +1,6 @@
 #include "MasterFVM_Cfg.h"
 
 
-uint8 resetData[3*NUM_RESET];
-
 
 ConfirmECU_Type confirmECU[]={  //可配置的
     {

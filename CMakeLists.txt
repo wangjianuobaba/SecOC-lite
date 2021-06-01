@@ -36,6 +36,7 @@ set(UTILS_SOURCES
 #set(TEST_MASTER ${CMAKE_CURRENT_SOURCE_DIR}/test/test_master.c)
 #set(MASTER_INCLUDES
 #        ${MASTER_INCLUDE}/masterFVM.h
+#        ${MASTER_INCLUDE}/masterFVM_Cfg.h
 #        )
 #set(MASTER_SOURCES
 #        ${MASTER_SOURCE}/masterFVM.c

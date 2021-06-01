@@ -80,6 +80,16 @@ FVM_updateTrip(P2CONST(PduInfoType, SLAVE_CODE, SLAVE_APPL_CONST)PduInfoPtr) {
     if (hashValue != receiveMacValue)
         return E_NOT_OK;
 
+    // 更新
+    for (int i = 0; i < NUM_RESET; ++i) {
+        resetCnt[i].resetdata[0] = 1;
+    }
+    uint64 receiveTripValue = receiveTripResetValue >> (64 - TripCntLength);
+    uint8 TripByteLength = (TripCntLength + 7) / 8;
+    for (int i = 0; i < TripByteLength; ++i) {
+        trip[i] = (uint8) (receiveTripValue >> (8 * (TripByteLength - 1 - i)));
+    }
+
     return E_OK;
 }
 
@@ -94,6 +104,7 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
 
     // reset长度
     uint8 ResetCntLength = resetCnt[TxPduId].ResetCntLength;
+    uint8 ResetByteLength = (ResetCntLength + 7) / 8;
     uint8 *receiveData = PduInfoPtr->SduDataPtr; //64bit
     // 获取reset报文
     uint64 receiveDataValue = 0;
@@ -105,31 +116,48 @@ FVM_updateReset(VAR(PduIdType, COMSTACK_TYPES_VAR) TxPduId,
     uint64 receiveMacValue = receiveDataValue << ResetCntLength;
     receiveMacValue >>= ResetCntLength;
     uint64 receiveResetValue = receiveDataValue - receiveMacValue;
-
     uint64 macGenerateDataValue = 0;
-    macGenerateDataValue |= (uint64) resetCnt[TxPduId].resetcanid << 48;\
-
-    if(TripCntLength<=8) {
-        macGenerateDataValue |= ((uint64)trip[0]<<(8-TripCntLength))>>16;
-    } else if(8<TripCntLength&&TripCntLength<=16) {
-        macGenerateDataValue |= ((uint64)trip[0]<<(16-TripCntLength))>>16;
-        macGenerateDataValue |= (uint64)trip[1]>>(24-(16-TripCntLength));
-    } else if(16<TripCntLength&&TripCntLength<=24) {
-        macGenerateDataValue |= ((uint64)trip[0]<<(24-TripCntLength))>>16;
-        macGenerateDataValue |= (uint64)trip[1]>>(24-(16-TripCntLength));
-        macGenerateDataValue |= (uint64)trip[2]>>(32-(16-TripCntLength));
+    uint8 tripByteLength = (TripCntLength + 7) / 8;
+    uint32 tripDataValue = 0;
+    switch (tripByteLength) {
+        case 1:
+            tripDataValue = trip[0];
+            break;
+        case 2:
+            tripDataValue = ((uint32) trip[0] << 8) + (uint32) trip[1];
+            break;
+        case 3:
+            tripDataValue = ((uint32) trip[0] << 16) + ((uint32) trip[1] << 8) + (uint32) trip[2];
+            break;
     }
-    macGenerateDataValue |=  (receiveResetValue >> (16+TripCntLength));
+    macGenerateDataValue |= (uint64) resetCnt[TxPduId].resetcanid << 48;
+    macGenerateDataValue |= (uint64) tripDataValue << (48 - TripCntLength);
+    macGenerateDataValue |= (receiveResetValue >> (16 + TripCntLength));
+
+    uint8 macGenerateData[8];
+    memset(macGenerateData, 0, sizeof(macGenerateData));
+    for (int i = 0; i < 8; ++i) {
+        macGenerateData[i] = (uint8) (macGenerateDataValue >> ((7 - i) * 8));
+    }
 
     uint8 hash[8];
-    Mac_Generate((uint8 *) macGenerateDataValue, 8, hash);
-    if (*(uint64 *) hash != *(uint64 *) receiveMacValue) {
+    Mac_Generate(macGenerateData, 8, hash);
+
+    uint64 hashValue = 0;
+    for (int i = 0; i < 8; ++i) {
+        hashValue += (uint64) hash[i] << (8 * (7 - i));
+    }
+    hashValue >>= ResetCntLength;
+
+    if (hashValue != receiveMacValue) {
         return E_NOT_OK;
     }
 
-    //TODO: 编译器没警告，但我不确定行不行，不行就换memcopy
-    *(resetCnt[TxPduId].resetdata) = receiveResetValue;
-
+    // 更新
+    receiveResetValue >>= (64 - ResetCntLength);
+    for (int i = 0; i < ResetByteLength; ++i) {
+        resetCnt[TxPduId].resetdata[i] = (uint8) (receiveResetValue >> (8 * (ResetByteLength - 1 - i)));
+    }
 
     return E_OK;
 }

@@ -167,7 +167,7 @@ void testGetResetValue() {
     resetCnt[1].ResetCntLength = 8;
 
     trip[0] = 0x01;
-    trip[0] = 0xa5;
+    trip[1] = 0xa5;
 
     resetCnt[1].resetdata[0] = 0xa1;
 
@@ -183,7 +183,7 @@ void testGetResetValue() {
     resetCnt[1].ResetCntLength = 10;
 
     trip[0] = 0xff;
-    trip[0] = 0xdd;
+    trip[1] = 0xdd;
 
     resetCnt[1].resetdata[0] = 0x00;
     resetCnt[1].resetdata[1] = 0xcb;
@@ -200,8 +200,8 @@ void testGetResetValue() {
     resetCnt[1].ResetCntLength = 7;
 
     trip[0] = 0x00;
-    trip[0] = 0x12;
-    trip[0] = 0x34;
+    trip[1] = 0x12;
+    trip[2] = 0x34;
 
     resetCnt[1].resetdata[0] = 0x01;
 
@@ -216,8 +216,8 @@ void testGetResetValue() {
 }
 
 int main() {
-    testInit();
-    testGetTripValue();
+//    testInit();
+//    testGetTripValue();
     testGetResetValue();
 }
 

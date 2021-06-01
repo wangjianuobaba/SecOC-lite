@@ -150,62 +150,6 @@ void getRxFreshness_test() {
         }
     }
 }
-/**
- * 两种情况，等或不等
- *
- *
- */
-//void GetTxFreshness_test(){
-//    uint16 id = 0;
-//    uint8 reset_data[2];
-//    uint8 pre_reset_data[2];
-//    resetCnt[id].resetdata = reset_data;
-//    resetCnt[id].preresetdata = pre_reset_data;
-//    uint8 msg_data[2];
-//    uint8 pre_msg_data[2];
-//    msgCnt[0].msgdata = msg_data;
-//    msgCnt[0].premsgdata = pre_msg_data;
-//    trip[id] = 1;
-//    preTrip[id]=1;
-//    uint8 *fv,*fvlen;
-//    FVM_GetTxFreshness(id,fv,fvlen);
-//    //全pre， msg+1
-//    assert(*fv==0x6E);
-//
-//    id = 1;
-//    reset_data[1] = 1;
-//    pre_reset_data[1] = 2;
-//    msg_data[1] = 1;
-//    pre_msg_data[1] =2;
-//    trip[id]=2;
-//    preTrip[id]=2;
-//    FVM_GetTxFreshness(id,fv,fvlen);
-//    //全last，msg=init+1
-//    assert(*fv==0x71);
-//    return;
-//}
-//
-//void updatePreValue_test(){
-//    //三个值均为1
-//    //0 16 15 16
-//    int TxPduId = 0;
-//    uint8 * fv ,fv2[]={0,1,1,0,0,1,0,1};
-//    fv=fv2;
-//    FVM_updatePreValue(TxPduId,fv);
-//
-//    assert(preTrip[TxPduId]==240);
-//    assert(resetCnt[TxPduId].preresetdata == 1);
-//    assert(msgCnt[TxPduId].premsgdata == 1);
-//    //1 16 17 26
-//    TxPduId = 1;
-//    bitmap fv3= init_from_uint8(8796160131073,64);
-//    FVM_updatePreValue(TxPduId,fv3.M);
-//    assert(preTrip[TxPduId]==1);
-//    assert(resetCnt[TxPduId].preresetdata == 1);
-//    assert(msgCnt[TxPduId].premsgdata == 1);
-//
-//    return;
-//}
 
 //GetTripValueTest:
 //1:
@@ -220,11 +164,12 @@ void getRxFreshness_test() {
 //1:
 //0xe0,0x3,0x59,0xd2,0xa,0xad,0x95,0xab,
 //2:
-//0xa2,0x2d,0xf7,0x95,0xae,0x4a,0x1a,0x5c,
+//0xa2,0x1,0x14,0xc3,0xd7,0x32,0xf9,0x41,
 //3:
-//0x33,0x1a,0xfe,0xe9,0xd0,0xa9,0x54,0xcc,
+//0x33,0x36,0x0,0x90,0x71,0xad,0x38,0xde,
 //4:
-//0x4,0x12,0x68,0x6c,0x22,0xa2,0x2f,0x4b,
+//0x5,0xe2,0x75,0x68,0x6d,0xe8,0x6f,0x2b,
+
 
 void testTrip(){
     printf("TripTest:\n");
@@ -271,23 +216,61 @@ void testTrip(){
 }
 
 void testReset(){
-    printf("TripTest:\n");
+    printf("ResetTest:\n");
     PduInfoType pduInfoPtr;
 
     printf("1:\n");
     TripCntLength = 5;
+    trip[0] = 1;
+    resetCnt[0].ResetCntLength = 19;
     resetCnt[0].resetcanid = 0x0065;
-    tripcanid = 0x2bd;
-    uint8 data1[8] = {0xd,0xe0,0x21,0xa9,0xbd,0xfe,0xca,0x5c};
+    uint8 data1[8] = {0xe0,0x3,0x59,0xd2,0xa,0xad,0x95,0xab};
     pduInfoPtr.SduDataPtr = data1;
-    uint8 result = FVM_updateTrip(&pduInfoPtr);
+    uint8 result = FVM_updateReset(0,&pduInfoPtr);
     assert(result == E_OK);
     printf("Success.\n");
 
+    printf("2:\n");
+    TripCntLength = 9;
+    trip[0] = 0x01;
+    trip[1] = 0xa5;
+    resetCnt[0].ResetCntLength = 8;
+    resetCnt[0].resetcanid = 0x0065;
+    uint8 data2[8] = {0xa2,0x1,0x14,0xc3,0xd7,0x32,0xf9,0x41};
+    pduInfoPtr.SduDataPtr = data2;
+    result = FVM_updateReset(0,&pduInfoPtr);
+    assert(result == E_OK);
+    printf("Success.\n");
+
+    printf("3:\n");
+    TripCntLength = 16;
+    trip[0] = 0xff;
+    trip[1] = 0xdd;
+    resetCnt[0].ResetCntLength = 10;
+    resetCnt[0].resetcanid = 0x0066;
+    uint8 data3[8] = {0x33,0x36,0x0,0x90,0x71,0xad,0x38,0xde};
+    pduInfoPtr.SduDataPtr = data3;
+    result = FVM_updateReset(0,&pduInfoPtr);
+    assert(result == E_OK);
+    printf("Success.\n");
+
+    printf("4:\n");
+    TripCntLength = 20;
+    trip[0] = 0x00;
+    trip[1] = 0x12;
+    trip[2] = 0x34;
+    resetCnt[0].ResetCntLength = 7;
+    resetCnt[0].resetcanid = 0x0066;
+    uint8 data4[8] = {0x5,0xe2,0x75,0x68,0x6d,0xe8,0x6f,0x2b};
+    pduInfoPtr.SduDataPtr = data4;
+    result = FVM_updateReset(0,&pduInfoPtr);
+    assert(result == E_OK);
+    printf("Success.\n");
 
 }
 
 int main(int argc, char const *argv[]) {
-    testTrip();
+//    testTrip();
+    testReset();
     return 0;
 }
